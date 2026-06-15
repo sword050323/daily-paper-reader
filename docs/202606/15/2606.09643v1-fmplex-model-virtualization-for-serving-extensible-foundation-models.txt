@@ -1,0 +1,1198 @@
+Title: FMplex: Model Virtualization for Serving Extensible Foundation Models
+
+URL Source: https://arxiv.org/pdf/2606.09643v1
+
+Published Time: Tue, 09 Jun 2026 02:31:33 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# FMplex : Model Virtualization for Serving Extensible Foundation Models 
+
+## Hetvi Shastri 1 Pragya Sharma 2 Walid A. Hanafy 1 David Irwin 1 Mani Srivastava 2
+
+## Prashant Shenoy 11University of Massachusetts Amherst 
+
+2University of California Los Angeles 
+
+## Abstract 
+
+Foundation models (FMs) are increasingly used as backbones for downstream tasks across language, vision, time-series, and multimodal applications. Yet existing model-serving sys-tems deploy each customized task as an independent model instance, thereby replicating heavyweight backbones, wast-ing accelerator memory, and losing opportunities to amortize batching and loading costs. This paper presents FMplex , a serving system that treats FM backbones as a virtualization substrate for deployment sharing. FMplex presents each task with a virtual foundation model ( vFM ), a logically private FM instance backed by a shared physical FM. This abstraction lets independently customized tasks share a backbone while preserving task-specific extensions, independent lifecycles, and task-level isolation. In addition, we propose a batch-aware fair-queueing scheduler that combines weighted task-level sharing with inter- and intra-task batching across co-located tasks. We implement a FMplex -based serving stack spanning task construction, sharing-aware deployment, and runtime execution. Across 7 FM backbones (16 variants) and 92 downstream tasks, FMplex reduces latency by up to 80% over spatial partitioning and 33.3% over best-effort co-location, while hosting up to 6 × more tasks at cluster scale. 
+
+## 1 Introduction 
+
+Recent advances in artificial intelligence (AI) have changed how we design and build applications across video analytics, web services, chatbots, AR/VR, recommendation systems, and IoT [ 59 , 62 , 67 ]. Increasingly, these advances are driven by foundation models (FMs), a new generation of general pretrained backbone models trained on broad, large-scale datasets using self-supervision and capable of supporting a wide range of downstream tasks with limited or no fine-tuning [ 6, 7 ]. Foundation models now span many domains and modalities, including time series [ 3 , 19 ], vision [ 49 , 54 ], and natural language [ 8 , 23 , 41 , 73 ]. Large language models (LLMs) are examples of text-based foundation models, while vision-language models (VLMs) [ 34 , 42 , 75 , 80 ] are examples of multimodal foundation models supporting text and vision. A key benefit of foundation models is that they reduce the need to train separate models for different downstream tasks, while still being customizable and extensible to spe-cific task needs. For instance, a task using a foundation 1 2 4 6 8 10    
+
+> #Tasks
+> 0.0
+> 5.0
+> 10.0
+> 15.0
+> 20.0
+> GPU Memory (GB)
+> OOM
+> Instance-per-Task Deployment Sharing GPU Memory Throughput
+> 025 50 75 100
+> Throughput (req/s)
+
+Figure 1. Benefits of FM sharing in terms of memory demand and throughput across a number of tasks and modalities. model will typically use a task-specific head ( e.g. , a classifier head) and can further fine-tune the model using parameter-efficient fine-tuning approaches [ 39 ]. Despite the multi-task nature of foundation models, conventional model-serving systems, such as NVIDIA Triton [ 45 ], are still built around task-specific model deployments. These systems improve resource efficiency through request batching and GPU shar-ing [ 1 , 11 , 57 , 62 , 82 ], but a common theme across prior ap-proaches is the use of a separate model instance for each task ,which is a natural design choice for task-specific models. However, the instance-per-task approach is a poor fit for FMs. FMs are backbone-heavy models designed for multi-task use and are often orders of magnitude larger than task-specific models. As a result, tasks built on the same FM are forced to load redundant copies of the same backbone, incur-ring duplicate memory usage and poor accelerator utilization. This pattern precludes what we call deployment sharing , in which multiple tasks share a common FM instance. Figure 1 illustrates the benefits of FM sharing as the number of tasks increases, with requests issued in a closed-loop manner us-ing the settings detailed in Section 7.1. As shown in Figure 1, co-locating 10 time-series tasks on a shared MOMENT-large backbone requires only 1.17 × the memory of a single task, compared to 10 × under independent deployment. This sav-ings is possible because the backbone dominates pipeline memory, while task-specific components (decoder heads, adapters, encoders) add only marginal overhead per task. In addition, the figure shows that sharing FMs can increase throughput by 83%, whereas replicating FMs can decrease it, as different tasks compete for GPU resources. However, sharing FMs across tasks introduces three key challenges. Challenge 1: Deployment sharing introduces cross-task interference. When multiple tasks share the same 
+
+> 1
+> arXiv:2606.09643v1 [cs.DC] 8 Jun 2026 Shastri et al. vFM
+> Task 3
+
+FM 
+
+Task 1 
+
+(a) Instance-per-task (b) FM virtualization 
+
+FMplex 
+
+FM 
+
+> vFM
+
+Task 2 
+
+FM 
+
+Task 3 
+
+FM 
+
+Task 2 
+
+Task 1 
+
+> vFM
+
+Figure 2. Comparing (a) the instance-per-task approach, where each task loads its own FM and the backbone is repli-cated, with (b) our FM virtualization approach, where each task is presented with a virtual FM ( vFM ) backed by a shared physical FM, enabling deployment sharing. FM, their inference requests execute on the same model in-stance and may be batched together, increasing the risk of cross-task interference. As a result, load spikes from one task can consume shared resources and increase queue-ing delays for other tasks. Although modern GPUs provide device-level virtualization and spatial partitioning mecha-nisms ( e.g. , NVIDIA MIG [ 47 ], transparent compute partition-ing [ 4 ], and CUDA Green Contexts [ 46 ]), these mechanisms do not directly provide per-task isolation inside a shared FM, where interference arises at the model-serving and request-scheduling layers. Challenge 2: Deployment sharing com-plicates task-specific customization. Sharing an FM should not preclude tasks from specializing the FM for task-specific semantics. Tasks may require task-specific heads or fine-tuned parameters, but deployment sharing must separate a task’s logical view of a customized model from the physical state of the shared FM. Otherwise, customization by one task could affect all other tasks that use the same FM. Challenge 3: Deployment sharing must accommodate independent task lifecycles over a shared FM. In deployment sharing, the set of tasks bound to a shared FM evolves at runtime. Tasks may arrive, change their service objectives, or be removed without redeploying the underlying FM. Multi-task learning approaches [ 35 , 71 ] address task plurality at training time but couple the deployed artifact to a predetermined task set, which is incompatible with runtime task churn. As a result of these challenges, we argue that the backbone of a foundation model should be treated as a shared system substrate, analo-gous to how operating systems virtualize CPUs or memory, rather than as a per-task deployment artifact. These chal-lenges call for treating the FM backbone as shared infras-tructure rather than a private per-task artifact, mirroring classical virtualization systems that multiplex physical re-sources across isolated execution contexts [ 12 , 37 , 40 , 53 , 70 ]. In this paper, we present FMplex , a new approach for FM serving that addresses these challenges. At its core is founda-tion model virtualization, where FMplex presents each task with a virtual foundation model ( vFM ), a logically private FM instance that the task can fully customize or fine-tune, while 
+
+FMplex multiplexes many vFMs over shared physical FMs. By mapping vFMs to shared physical FMs, FMplex improves resource efficiency through deployment sharing without du-plicating the FM. This vFM abstraction directly addresses Challenges 2 and 3, isolating each task’s customization state from the shared physical FM and allowing tasks to be created or removed without redeploying it. Figure 2 illustrates the difference between (a) the instance-per-task approach, where tasks are coupled to separate FM instances and do not share a backbone, and (b) our proposed FM virtualization approach, where tasks share the same backbone through vFMs . In ad-dition, FMplex isolates vFMs from one another using Batch-aware Fair Queueing ( BFQ ), a fair-sharing approach designed for shared FM execution. Like traditional fair-share sched-ulers, BFQ assigns each vFM a weight and allocates shared FM execution in proportion to it, thereby preventing interfer-ence among tasks sharing the same physical FM. However, 
+
+BFQ is designed for deployment-sharing scenarios, maximiz-ing efficiency through inter- and intra-task request batching. In doing so, BFQ addresses Challenge 1, providing per-task isolation without sacrificing the efficiency benefits of consoli-dation. Finally, we integrate FMplex with Task-API (an API for customizing FMs) and FMplex-Controller (a cluster-level controller for FM sharing-aware deployment and run-time adaptation) to build an end-to-end serving stack for extensible FMs. In designing and implementing FMplex , we make the fol-lowing contributions: 
+
+• FM Virtualization for Deployment Sharing. We in-troduce FMplex , an FM virtualization layer that presents each task with a logically private vFM while multiplexing many vFMs over shared physical FMs. This abstraction decouples task customization and lifecycle management from physical FM deployment; BFQ provides the runtime isolation needed to share a physical FM while preserving the throughput benefits of inter- and intra-task batching. 
+
+• Sharing-Based Serving Stack. We build an end-to-end serving stack around FMplex , integrating Task-API for extensible task construction and FMplex-Controller 
+
+for cluster-level sharing-aware deployment. This design makes FM virtualization operational across heterogeneous FMs and multi-task workloads. 
+
+• Prototype Implementation. We implement the FMplex -based serving stack with support for multiple FM modali-ties ( e.g. , time-series, vision FMs, LLMs, and VLMs) and runtimes ( e.g. , PyTorch and vLLM), demonstrating the flexibility and utility of our design. 
+
+• Evaluation. We evaluate FMplex across 7 backbone foun-dation models (16 variants) and 92 downstream tasks span-ning time-series, vision, language, and vision-language modalities. For two tasks sharing the same backbone, 
+
+FMplex reduces latency by up to 33.3% over current co-location approaches and by 80% over spatial-partitioning approaches. BFQ sustains 0.97–0.98 fairness at 84 RPS un-der asymmetric service weights, where classical fair-share  
+
+> 2FMplex : Model Virtualization for Serving Extensible Foundation Models
+
+Foundation Model 
+
+Adapter 
+
+Decoder Head Encoder 
+
+Figure 3. Architecture of an FM-based task pipeline featur-ing a decoder head , optional encoder and fine-tuning adapter .schedulers achieve similar fairness at only 37 RPS. At clus-ter scale, FMplex hosts up to 6 × more tasks than current co-location approaches at low load, where memory is the binding constraint, and 8–12% more at moderate and high load, where compute is the binding constraint. 
+
+## 2 Background 
+
+This section provides background on foundation models, FM extension mechanisms, and model-serving systems. 
+
+2.1 Foundation Models 
+
+Recent advances in AI have shifted model development from task-specific architectures toward general-purpose founda-tion models. Earlier approaches typically trained special-ized models for tasks such as classification, object detec-tion, and segmentation [ 24 , 56 , 58 , 72 , 79 ]. In contrast, foun-dation models (FMs) are general-purpose pretrained back-bone models trained on large, heterogeneous datasets us-ing self-supervision and can be adapted to a wide range of downstream tasks [ 6, 7 ], achieving strong performance with limited or no task-specific adaptation. FMs cover mul-tiple input modalities, including time series, vision, lan-guage, and combinations of these. Examples include time-series foundation models (TSFMs) [ 3 , 17 , 19 ], vision foun-dation models (VFMs) [ 15 , 49 , 54 ], LLMs [ 8 , 23 , 41 , 73 ], and VLMs [ 34 , 42 , 75 , 80 ]. Other FMs target specific application domains, including energy [ 29 , 38 ], finance [ 55 , 66 , 83 ], and health [ 14 , 18 , 27 , 52 ]. Across these settings, a single FM often supports several downstream tasks, an ability we refer to as task sharing , meaning that the model can be adapted to different tasks even if each task is deployed as a separate model instance. For example, MOMENT [ 19 ], a time-series FM, can perform classification, forecasting, and anomaly detection from a single backbone. 
+
+2.2 Extending Foundation Models 
+
+FMs differ in how their backbones process requests. For instance, representation-based FMs use the backbone as a feature extractor, with a fixed input and output shape. Ex-amples include time-series FMs such as MOMENT [ 19 ] and vision FMs such as DINOv2 [ 49 ]. In contrast, token-based 
+
+FMs operate autoregressively over token sequences, taking tokenized input and producing tokenized output; examples include LLMs such as LLaMA [ 73 ] and VLMs such as LLaMA-3.2-Vision [ 42 ]. In either case, each task relies on the FM backbone for the shared computation that supports multiple downstream tasks. The backbone is the primary component, often multiple orders of magnitude larger in parameters and memory than the remaining task-specific components, as shown in Figure 1, and is heavyweight to instantiate (large weights, non-trivial loading warmup time). Tasks, by con-trast, consist only of a task specification and lightweight extension weights. Figure 3 illustrates the common compo-nents of an FM-based task pipeline and the extension points used to customize an FM 1.To extend an FM, a task typically includes a task-specific 
+
+decoder head attached to backbone outputs. Example heads include MLP classifiers or dense decoders for tasks such as classification, forecasting, detection, and segmentation [ 6, 19 ,38 , 52 , 68 ]. In addition, rather than using the FM backbone as is, tasks may fine-tune the backbone to improve accu-racy. Parameter-efficient fine-tuning (PEFT) adapters [ 5 , 39 ], such as LoRA [ 26 ], enable such fine-tuning while updat-ing only a small subset of parameters within the back-bone [ 25 , 63 , 64 , 78 ]. A task may also use an encoder to perform input-side adaptation, transforming or normalizing raw inputs into an intermediate representation before feed-ing them into the backbone. Finally, some token-based FMs (e.g. , LLMs) additionally support prompt-based adaptation, where tasks are expressed through input tokens without modifying backbone weights. Despite this flexibility, current approaches to extending FMs are heterogeneous, and existing implementations are often ad hoc and model-specific, limiting portability across runtimes. 
+
+2.3 Model-Serving Systems 
+
+Model-serving systems are runtime frameworks for ef-ficient inference of machine learning models. A model-serving system can serve multiple models, support mul-tiple concurrent tasks, and manage execution across one or more GPUs and servers. Examples include NVIDIA Tri-ton [ 45 ], vLLM [ 30 ], and other inference-serving frame-works [ 1 , 11 , 22 , 32 , 43 , 57 , 62 , 82 ]. As discussed in Section 1, conventional model-serving systems load a separate model instance for each task and use that instance to serve incom-ing requests. Foundation models create new opportunities for more resource-efficient execution beyond this instance-per-task approach. For example, if two tasks use the same backbone but different decoder heads, the serving system can load a single copy of the backbone and share it between the tasks, rather than deploying separate backbone copies. In this setup, the serving system executes each task’s requests (or batch of requests) against the shared backbone and then applies the task-specific decoder head to produce the final output, an approach we denote as deployment sharing . Such          
+
+> 1Throughout the paper, we use encoder to refer to an input-side adaptation module that pre-processes data before invoking the FM, decoder head or
+> decoder to refer to a task-specific output head, adapter to refer to a light-weight PEFT module attached to the FM backbone, and pipeline to refer to the user-defined composition of these components around an FM backbone. 3Shastri et al.
+
+deployment sharing can significantly improve resource effi-ciency, especially by reducing GPU memory footprint. How-ever, it also introduces cross-task interference, task-specific customization, and independent task-lifecycle challenges, which Section 3.1 formalizes as design requirements. 
+
+## 3 Design Overview 
+
+This section presents the four design requirements for sharing-aware model serving, followed by an overview of 
+
+FMplex and the FMplex -based model serving stack. 
+
+3.1 Design Requirements 
+
+FMplex must satisfy four design requirements.  
+
+> R1
+
+Backbone sharing as a first-class primitive. FM back-bones are heavyweight system objects, often requiring giga-bytes of GPU memory and substantial loading and warmup time, whereas task-specific state (e.g., decoder weights, PEFT adapters, queue state, and accounting metadata) is compara-tively lightweight. The serving system must support multiple tasks per FM instance, treating the backbone as a shared sub-strate rather than a per-task resource.  
+
+> R2
+
+Decoupling backbone from task lifecycle. The serv-ing system must therefore decouple the backbone-instance lifecycle from the task lifecycle, allowing tasks to maintain independent queues, customization state, and accounting identities independent of the specific backbone instance cur-rently serving them. This decoupling enables runtime adapta-tion through lightweight task-state movement and rebinding across existing FM instances, rather than requiring expensive FM reloading or full model redeployment.  
+
+> R3
+
+Task-level isolation. Tasks have heterogeneous request rates and arrival patterns. The serving system must provide a per-task isolation boundary, a named, addressable context with its own request queue and accounting state, at which scheduling, fairness, and admission decisions are enforced.  
+
+> R4
+
+Unified extensibility. FMs span a wide range of ar-chitectures, modalities, and processing mechanisms. The serving system must expose a uniform extensibility interface through which tasks attach decoders, adapters, and prompts to a backbone, without per-task changes to the runtime or per-backbone reimplementation of the extension layer. 
+
+3.2 FMplex Overview 
+
+Figure 4 depicts the overview of FMplex . At a high level, 
+
+FMplex decouples each task’s logical view of the founda-tion model from its physical substrate. Analogous to a Hy-pervisor [ 70 ] or Containers [ 37 , 40 ], FMplex presents each task with a virtual foundation model ( vFM ) and multiplexes many vFMs over a single shared physical FM. FMplex com-prises three components that jointly realize R1 – R4 . The vFM 
+
+abstraction (Section 4.1) realizes this per-task decoupling, satisfying R1 and R2 , giving the task its own invocation con-text, state, and service policy, and letting the task extend the Task 3 
+
+> Task 2
+
+# FMplex  
+
+> Task 1
+> E1
+
+vFM D1 
+
+> PEFT Adapter
+
+FM  
+
+> LoRA LoRA PEFT Adapter
+> 2
+> 7
+> 5
+> 1
+> 6
+> Scheduler
+> 4
+> 3Task-API
+
+Figure 4. Overview of FMplex . The figure contrasts the task-side vFM view with the underlying physical FM deployment. Steps 1–7 illustrate the request path through FMplex .
+
+vFM using FM customization approaches. The batch-aware fair-share scheduler (Section 4.2) arbitrates execution across colocated vFMs sharing a backbone, satisfying R3 . Task-API 
+
+(Section 4.3) is the task-facing programming interface for composing encoders, decoders, and adapters around a vFM ,satisfying R4 . To the best of our knowledge, FMplex is the first system to treat foundation-model backbones as a vir-tualization substrate, extending these classical primitives to FM serving. 
+
+Sharing-Based Serving Stack. Figure 6 presents the end-to-end serving stack built on top of FMplex . Users construct task pipelines through Task-API ’s client-side library and submit them as deployment artifacts to 
+
+FMplex-Controller . FMplex-Controller is a sharing-aware deployment manager that maintains the current de-ployment state, mapping tasks to physical FM instances across the cluster based on per-task profiles, SLOs, and observed load. We detail FMplex-Controller ’s sharing-aware deployment and elastic-adaptation mechanisms in Section 5. 
+
+## 4 FM Virtualization 
+
+This section describes the design of FMplex , our virtualiza-tion approach, and its three components: the vFM abstrac-tion (Section 4.1), the batch-aware fair-share scheduler (Sec-tion 4.2), and the Task-API programming interface (Sec-tion 4.3). 
+
+4.1 Virtual Foundation Model ( vFM )
+
+The key abstraction exported by FMplex is the virtual founda-tion model (vFM ), which presents each task with the illusion that it is running exclusively on its own foundation model. The vFM decouples each task from the underlying physical FM and provides a control point for accounting, isolation, and policy enforcement. Without this abstraction, tasks would appear to the runtime only as anonymous request streams entering a shared backbone, making task-specific customiza-tion, per-task isolation, and accounting impossible to enforce. A vFM includes three facets: 
+
+> 4
+
+FMplex : Model Virtualization for Serving Extensible Foundation Models 
+
+• Virtual Queue. A task invokes its vFM as if it were a dedi-cated foundation model. FMplex intercepts each invoca-tion and routes it through a per-task virtual queue, redi-recting execution onto the shared backbone without the task interacting with it directly. 
+
+• Task Extensions. Each vFM holds the task-specific exten-sions (encoder, decoder, and PEFT adapter) that customize the shared backbone for the task’s downstream behavior. 
+
+• State and accounting. Each vFM holds task-level configura-tion (SLOs, priorities, fair-share weight) and has its own named accounting identity. FMplex tracks resource usage, request rates, and admitted load per vFM , and uses this information to drive admission control, fair sharing, and SLO enforcement. Figure 4 traces an end-to-end request through FMplex . A request first arrives at the task endpoint ( e.g. , via HTTP) 1
+
+and enters the task-specific frontend pipeline 2 . When the task invokes the vFM via the Task-API 3 , FMplex redirects the call to the task’s virtual queue 4 . The scheduler then selects queued requests for execution on the shared FM 5
+
+and binds task-specific adapters as needed 6 . The resulting outputs are returned to the task pipeline, which produces the final response 7 .
+
+4.2 Batch-aware Fair Sharing and Isolation 
+
+The FMplex scheduler realizes fair sharing and isolation across vFMs , providing each task a predictable share of exe-cution capacity, independent of the behavior of co-resident tasks. However, this isolation should not erode the efficiency gains of inter- and intra-task batching. Meeting both re-quirements is challenging because FM scheduling differs from conventional CPU or GPU scheduling in four ways. First, fair-share scheduling approaches [ 13 , 20 , 50 , 74 ], fo-cus on per-request basis, whereas model-serving systems rely heavily on request batching to improve throughput. Sec-ond, batching improves accelerator utilization but increases queueing delay due to head-of-line blocking [ 11 , 22 , 57 ]. Third, PEFT adapters introduce batching compatibility con-straints and switching overheads that existing fair schedulers do not capture [ 13 , 20 , 33 ]. Fourth, FMplex must support both representation-based FMs ( e.g. , vision FMs with request-level batching) and token-based FMs ( e.g. , LLMs with continu-ous batching and long-lived decode iterations) [ 30 , 81 ]. To address these challenges, FMplex introduces BFQ , a batch-aware fair queueing scheduler. BFQ determines which vFMs 
+
+to serve, how many requests to admit from each vFM , which requests can be co-batched, and how execution is sequenced over time. 
+
+Batch-aware Fair Scheduling. BFQ is a work-conserving scheduler for shared FM execution that approximates weighted fair sharing while accounting for batching effi-ciency. We describe its representation-based implementation first, then explain how the same service-time accounting ap-plies to token-based runtimes. BFQ is derived from start-time (b) Batching without Adapters (c) Batching with Adapters (a) Non-batching 
+
+> Adapter Execution
+
+Figure 5. BFQ behavior under different scenarios. 
+
+Table 1. High-level Description of Task-API                                  
+
+> Call Input Description
+> class Encoder: None Encoder Interface
+> E.run(..) request Process a request in Encoder
+> class Decoder: None Decoder Interface
+> D.run(..) request Process a request in Decoder
+> class Adapter: None Adapter Interface
+> class vFM: FM-ID vFM Interface
+> v.run(..) request Process a request in an FM
+> class Pipeline: vFM A task pipeline with FM as input
+> p.add_encoder() Encoder Add encoder to pipeline
+> p.add_decoder(..) Decoder Add decoder to pipeline
+> p.attach_adapter(..) PEFT Adapter Attach an adapter to vFM p.remove_adapter(..) Adapter-ID Remove an adapter from vFM p.run(..) request Process a request in pipeline
+> p.train(..) Data Loader, Hyper Parameters Train encoder, adapter, or decoder
+
+fair queueing ( STFQ ) [ 20 ], but extends it from per-request or-dering to batch formation. For task 𝑖 with weight 𝑤 𝑖 , request 
+
+𝑗 is assigned a start tag 𝑆 𝑗 𝑖 and a finish tag 𝐹 𝑗 𝑖 :
+
+𝑆 𝑗 𝑖 = max {𝐹 𝑗 −1 
+
+> 𝑖
+
+, 𝑣 }, (1) 
+
+𝐹 𝑗 𝑖 = 𝑆 𝑗 𝑖 + 𝑙 𝑤 𝑖 
+
+, (2) 
+
+where 𝑣 is the scheduler’s global tag at arrival, computed as 𝑣 = max 𝑖 𝐹 last  
+
+> 𝑖
+
+, the maximum finish tag across each task’s most recently dispatched request, and 𝑙 is the expected ser-vice time of a single request. Unlike STFQ , BFQ must jointly decide which requests to serve and how many to batch. It therefore orders queued requests by start tag and iteratively extends the candidate batch until either (1) the batch reaches maximum allowed batch size 𝐵 max , typically configured at the FM’s profiled throughput knee, beyond which larger batches yield limited throughput gains (see Figure 1), or (2) admitting another request would push any selected re-quest past its SLO deadline given the batch’s estimated com-pletion time. Finally, to account for adapter-compatibility constraints, BFQ batches the requests across the common backbone first then integrate adapter difference sequentially across in-compatible requests thereby respecting adapter compatibility while preserving BFQ ’s fair-share accounting. Batching introduces a mismatch between the expected and realized service times. The reason is that when requests are co-batched, the amortized service time per request decreases, so the start and finish tags computed under single-request service overestimate the actual service consumed. To correct this mismatch, after executing a batch, BFQ recomputes the finish and start tags of every queued request whose task contributed to the executed batch, using a batch-dependent service time: 
+
+𝐹 𝑗 𝑖 = 𝑆 𝑗 𝑖 + 𝑙 𝑖 (𝑏 )
+
+𝑤 𝑖 
+
+, (3) 
+
+where 𝑙 𝑖 (𝑏 ) denotes the effective per-request service time for task 𝑖 when one of its requests is co-executed in a compatible 
+
+5Shastri et al. 
+
+sub-batch of size 𝑏 . This preserves batching efficiency while keeping the schedule informed with realized service times. 
+
+Token-based FMs. FMplex applies the same accounting principle to token-based FMs by charging token-level work in service-time units. This keeps vFM scheduling consistent across request-level and token-level runtimes without intro-ducing a new token-scheduling policy. 
+
+Example. Figure 5 illustrates three cases. In (a) requests are not batched e.g. , if batching would violate the SLO. In (b), batching preserves the SLO, so the scheduler co-batches requests. In (c), adapter incompatibility prevents batching across adapter fused backbones. Hence we batch across single base backbone and loop across delta caused due to adapters. 
+
+4.3 Task-API 
+
+Task-API is the task-facing realization of the vFM ab-straction (Section 4.1). It gives task developers a small in-terface for specifying task-local extensions while giving 
+
+FMplex the metadata needed to instantiate, bind, and man-age those tasks over shared FM backbones. Table 1 summa-rizes the high-level API abstractions across encoders, de-coders, and vFMs . A task pipeline is constructed around a 
+
+vFM , to which encoders, decoders, and PEFT adapters ( e.g. ,LoRA) are attached. The API provides primitives such as 
+
+add_encoder() , add_decoder() , or attaching adapters to the vFM via attach_adapter() , which is applied inter-nally during the forward pass. Listing 1 illustrates a task pipeline based on MOMENT-Base [ 19 ], composed with a 
+
+LinearChannelCombiner encoder, an MLP decoder, and a 
+
+LoRA adapter. 
+
+Fine-tuning. Beyond pipeline specification, Task-API sup-ports end-to-end fine-tuning of task pipelines, where the vFM 
+
+backbone is treated as frozen by default, while encoder, de-coder, and adapter weights are trainable via the same pipeline object used for serving. Using the same pipeline object for fine-tuning and serving lets FMplex package the resulting task state as a deployment artifact without changing the serving runtime. Listing 2 in the appendix shows a complete training pipeline using Task-API .
+
+Deployment Artifacts. A completed task pipeline is pack-aged as a deployment artifact consumable by FMplex . This artifact includes the pipeline specification, encoder, adapter, and decoder implementations, their associated weights, and metadata describing the task’s runtime and load require-ments. These artifacts allow FMplex to instantiate the task, bind it to the appropriate FM, and manage it within the FM serving infrastructure. 
+
+## 5 FMplex -based Serving Stack 
+
+In this section, we describe the FMplex -based serving stack, which integrates Task-API , per-server FMplex instances,  
+
+> 1
+
+P=Pipeline(vMomentModelBase(...))  
+
+> 2
+
+P.add_encoder(LinearChannelCombiner(...))  
+
+> 3
+
+P.add_decoder(MLP(...))  
+
+> 4
+
+P.attach_adapter(LoRA_Adapter(...))  
+
+> 5
+
+res=P.run(...) 
+
+Listing 1. High-level example of a task pipeline attaching Moment-Base FM with MLP decoder, Linear channel encoder, and LoRA adapter. Cluster(s)      
+
+> Server M
+> Server 2 Task-API
+> Server 1
+> Task 1 Task 2 …Task 3 Task n
+> GPU Scheduler and Runtimes
+> GPU
+> Model Repository
+> FMplex-Controller
+> Monitoring
+> Task
+> dataset
+> Config.
+> Task Assets
+> Load Balancer
+> Cluster Manager
+> FM
+> Backbone
+> Proposed Components Traditional Components
+> FMplex
+> FM 1 FM 2
+
+Figure 6. End-to-end serving stack on top of FMplex .and FMplex-Controller to support task deployment, rout-ing, and adaptation across a cluster. 
+
+5.1 Overview 
+
+The mechanisms in Section 4 define how a single server virtu-alizes shared FM execution through vFMs , task-local queues, and BFQ . Figure 6 shows how FMplex fits into a broader model-serving stack. The stack retains standard components such as task endpoints, load balancing, monitoring, and per-server runtimes, but changes the deployment unit from an opaque model instance to a task pipeline bound to a physical FM instance. Task-API packages task pipelines as deploy-ment artifacts, and per-server FMplex instances bind their 
+
+vFMs to physical FM instances and execute requests through 
+
+BFQ . FMplex-Controller maintains the global deployment plan, deciding which FM backbones to instantiate, which tasks to bind to each backbone, and how routing should adapt as demand changes. This separation between task placement and backbone placement motivates the sharing-aware de-ployment policy in Section 5.2 and the elastic adaptation mechanisms in Section 5.3. 
+
+5.2 Sharing-aware Deployment 
+
+FMplex-Controller supports the virtualization layer by deciding how tasks are distributed among available back-bones and, when needed, where new backbones should be instantiated. To demonstrate the benefits of deployment shar-ing for model-serving orchestration, we intentionally use a lightweight greedy heuristic rather than a full placement optimizer (Algorithm 1). The heuristic prioritizes reusing existing FM backbones and accepts a placement when the  
+
+> 6FMplex : Model Virtualization for Serving Extensible Foundation Models
+
+Algorithm 1: Max-Share Heuristic                                                         
+
+> Input: Task T, servers S.
+> Output: Deployment plan 𝑃 or ⊥.
+> 1𝐶 ← ∅ ;// Candidate servers
+> 2𝐷 ←active_deployments( S,T);
+> 3for 𝑑 ∈best_fit_order( 𝐷, T)do
+> 4𝐶 ←𝐶 ∪ { 𝑑 };// Prefer existing backbones
+> 5𝑃 ←plan( T, 𝐶 );
+> 6if feasible( 𝑃 )then
+> 7return commit( 𝑃 );
+> 8for 𝑠 ∈best_fit_servers( S,T)do
+> 9𝑑 ←deploy( T.FM , 𝑠 );// Provision only as needed
+> 10 𝐶 ←𝐶 ∪ { 𝑑 };
+> 11 𝑃 ←plan( T, 𝐶 );
+> 12 if feasible( 𝑃 )then
+> 13 return commit( 𝑃 );
+> 14 return ⊥;
+
+profiled memory and compute constraints indicate that the new and existing tasks can meet their SLOs. Given a task’s required backbone, expected demand, SLO constraints, and available server capacity, Algorithm 1 computes a deploy-ment plan that specifies task-to-backbone bindings, task replication across servers, and request routing across active deployments. This choice exposes the deployment decisions enabled by FM virtualization and isolates the benefits of virtualization from orthogonal cluster-placement optimiza-tions. Algorithm 1 shows the Max-Share heuristic. 
+
+FMplex-Controller first considers active deployments whose backbones can serve the task. If multiple deployments or backbone choices are available, best_fit_order() 
+
+ranks them by how well they can absorb the task while leaving minimal unused capacity. plan() then computes the task-to-backbone bindings and routing assignments over the selected candidate set. A plan is feasible if any new backbone fits in GPU memory and the selected deployments have enough compute cycles to accommodate the assigned load without violating the SLOs of the new task or existing tasks already sharing those backbones. If no feasible plan exists using active deployments, the heuristic considers servers that can host the required backbone in best-fit order and stops at the first feasible plan. 
+
+5.3 Elastic Adaptation 
+
+FM virtualization also gives FMplex-Controller a cheaper response to some load changes and failures. Existing serving systems commonly trigger scaling from monitored load or failures [ 11 , 22 , 57 ], but the response is typically to create or move a complete model deployment. In the FMplex -based serving stack, when a compatible backbone is already run-ning with spare capacity, FMplex-Controller can instead update the affected task’s vFM binding and routing entry, moving only task-local state such as queue metadata, de-coder or adapter state, and scheduler weights. If no compat-ible backbone is available, the system falls back to normal backbone provisioning. We use this simple rebinding path only to illustrate the operational implication of decoupling tasks from backbones, and evaluate its cost in Section 7.5.2. 
+
+## 6 Implementation 
+
+Our prototype is implemented in Python in approximately 8K lines of code, integrating three components of the FMplex -based serving stack: Task-API , per-server FMplex instances, and FMplex-Controller . The components communicate through gRPC [ 21 ], which we also use for task submission, deployment control, client requests, load balancing, and rout-ing updates. We will release the code as open source upon acceptance. 
+
+Task-API . Task-API is implemented as a Python library for constructing, training, and packaging task pipelines. It builds on PyTorch [ 51 ] for encoder, decoder, and backbone execution, and uses PEFT [ 39 ] for LoRA adapters. The client-side library lets users define and fine-tune pipelines around a vFM , while the server-side library loads the resulting de-ployment artifact and exposes the serving-time hooks used by FMplex . Each artifact contains the pipeline specification, task extension code, extension weights, and metadata used by FMplex-Controller for placement and admission. 
+
+Per-server FMplex . Each server runs a FMplex instance that maintains the local vFM registry, task-specific queues, scheduler state, and bindings from vFMs to physical FM in-stances. Our prototype uses PyTorch [ 51 ] for the main run-time and includes a vLLM integration [ 30 ] to show how the vFM boundary can be mapped onto token-based run-times. Task-specific queues create a per-task scheduling and accounting boundary between task pipelines and shared FMs. We complement this with FM-level performance isola-tion through spatial GPU partitioning. When multiple FM instances share a single accelerator, FMplex assigns their CUDA streams to disjoint Thread Processing Cluster (TPC) subsets [4]. 
+
+FMplex-Controller . FMplex-Controller maintains the cluster-level deployment plan and pushes deployment and routing updates to per-server FMplex instances. Updates include task-to-FM bindings, replica deployment, and rout-ing assignments computed by the Max-Share heuristic (Sec-tion 5.2). 
+
+Monitoring and Profiling. At task registration, FMplex 
+
+runs a lightweight profiling pass. FM-level estimates (back-bone memory, loading time, and service time as a function of batch size) are computed once per backbone and reused across all tasks bound to it. Only task-specific overhead (en-coder, decoder, and adapter loading/unloading) is profiled per task. 
+
+> 7Shastri et al.
+
+## 7 Evaluation 
+
+We first quantify the resource and performance benefits of backbone sharing, then show that FMplex preserves per-task service shares and isolation under contention. We next study 
+
+FMplex at cluster scale. We close with microbenchmarks, covering adaptation and extension overhead, and a discus-sion of the strengths and limitations of our approach. The evaluation addresses the following research questions. 
+
+• What are the benefits of backbone sharing compared to current deployment strategies? R1 R2 
+
+• Does FMplex preserve per-task shares and performance isolation under contention? R3 
+
+• Does Task-API support diverse FM modalities and exten-sion mechanisms? R4 
+
+7.1 Experimental Settings 7.1.1 Experimental Testbed. We deploy FMplex on a cluster of up to 16 AWS g4dn.2xlarge instances, each equipped with a single NVIDIA T4 GPU (16 GB VRAM, 2560 CUDA cores), 8 vCPUs, and 32 GB of system memory. All instances share a common NFS namespace via Amazon EFS for model weights and task artifacts. 
+
+7.1.2 Foundation Models. We evaluate FMplex across 7 backbone FMs (16 variants in total) and 92 downstream tasks (classification, regression, etc. ) spanning time-series, vision, language, and vision-language modalities. Table 2 summarizes the backbones used and the number of down-stream tasks built on each. This diversity exercises FMplex ’s virtualization abstraction across heterogeneous FM families and extension mechanisms. 
+
+Table 2. Foundation models used in our evaluation.                     
+
+> Modality Backbone Sizes Tasks
+> Time Series MOMENT [19] (S/B/L) classification (2), forecasting (5), regression (3) Papagei [3] (P/S/SVRI) Vision DINOv2 [49] (S/B/L) classification (2), regression (1), segmentation (1) Swin [36] (T/S/B/L) VLM Qwen2.5 [75] 3B classification (1) Mistral-7B [28] 7B LLM Qwen2-VL [75] 2B OCR (1) Total 16 92
+
+7.1.3 Workload Traces. Our evaluation uses the follow-ing workload traces. (i) Poisson Distribution. We generate synthetic traces with Poisson-distributed arrivals, sweeping the per-task request rate from 1 to 20 RPS. (ii) Azure Func-tions Trace [ 60 ]. We use the Functions trace, a widely used trace in the model serving literature [ 57 , 62 , 82 ]. We treat function demand as task demand and cluster them into low-load (6-60 RPM), moderate-load (60-600 RPM), and high-load (600-1800 RPM) groups, randomly select a number of tasks, and assign them to backbones for every experiment, as we will detail in Section 7.4. 
+
+7.1.4 Evaluation Metrics. Our evaluation focuses on five metrics: (i) Latency. We report per-task, per-FM, and per-cluster latencies. (ii) Throughput. We report per-task and aggregate throughput across tasks. (iii) Loading Time. Time to load tasks and FMs, as an indicator of responsiveness. (iv) Memory Usage. GPU memory consumed across all de-ployments, capturing the resource efficiency of deployment sharing. (v) Fairness [ 16 ]. We report fairness to demonstrate the effectiveness of our isolation approach. 
+
+7.1.5 Baselines. We compare FMplex against the follow-ing baselines 2.
+
+• Single Task ( ST ). Each task runs in isolation on a dedi-cated GPU, with no sharing or co-location, thereby repre-senting a lower bound on per-task latency achievable on our hardware. 
+
+• Best-Effort Co-location ( BE ). Multiple task instances share a GPU without any isolation mechanism. Each task loads its own copy of the backbone and competes for com-pute resources without spatial or temporal partitioning. As earlier model-serving systems did not consider deploy-ment sharing, this baseline represents the deployment model used by existing serving frameworks [57, 62]. 
+
+• Spatial Partitioning ( SP ). Another no-sharing baseline that statically partitions the GPU’s resources among tasks. We rely on [ 4 ] to assign tasks to an exclusive, non-overlapping subset of the GPU’s Thread Processing Clus-ters (TPCs), providing spatial isolation while allowing multiple models to reside on a single GPU simultaneously. 
+
+• Shared Backbone Best Effort ( S-BE ). Tasks share a sin-gle backbone instance but the runtime batches requests in arrival order without any fair-sharing mechanism. 
+
+• Shared Backbone STFQ ( S-STFQ ). Multiple tasks share a single backbone instance with classical Start-Time Fair Queueing [ 20 ], but without batch-aware request grouping. 
+
+7.2 Benefits of FM Sharing 
+
+This section demonstrates the performance and resource-efficiency benefits of FM backbone sharing, showing how deployment sharing amortizes backbone memory and execu-tion across tasks and how task customizations affect batching behavior.         
+
+> 2Existing adapter-sharing systems [ 63 –65 ] are specialized to LoRA-based LLM serving and do not expose the generalized virtualization, lifecycle decoupling, or heterogeneous FM support that FMplex targets. We therefore compare against deployment and scheduling baselines representing current deployment practice. 8FMplex : Model Virtualization for Serving Extensible Foundation Models 1510 15 20
+> RPS/task
+> 0
+> 40
+> 80
+> 120
+> Mean Latency (ms)
+> ST
+> SP
+> BE
+> FMplex
+
+(a) Mean Latency 1 5 10 15 20  
+
+> RPS/task
+> 0
+> 133
+> 267
+> 400
+> P99 Latency (ms)
+> ST
+> SP
+> BE
+> FMplex
+
+(b) P99 Latency 
+
+Figure 7. Comparing FMplex when serving two tasks using Moment-Large ECG and gesture classification tasks across scheduling approaches. 1 5 10 15 20 
+
+> RPS/task
+> 0
+> 117
+> 233
+> 350
+> Mean Latency (ms)
+> ST
+> SP
+> BE
+> FMplex
+
+(a) DINOv2-Base 2 4 6 8 10  
+
+> RPS/task
+> 0
+> 67
+> 133
+> 200
+> Mean Latency (ms)
+> ST
+> SP
+> BE
+> FMplex
+
+(b) Swin-Large 
+
+Figure 8. Comparing FMplex when serving two tasks across models. 
+
+7.2.1 Benefits of FM-sharing on Performance. We first demonstrate the latency benefits of FM sharing rel-ative to the deployment baselines BE and SP , and quan-tify the sharing overhead against the per-task latency un-der no sharing ( i.e. , ST ). Figure 7 reports the mean and p99 latency when we co-locate ecg_classification and 
+
+gesture_classification on MOMENT-Large and sweep per-task arrival rate at 1, 5, 10, and 20 RPS using Poisson inter-arrival times. Figure 18 in Appendix B shows the full latency CDFs across request rates. As shown, at low load (1 RPS), FMplex and BE are compa-rable to ST , whereas SP has 13.7% and 39.4% higher mean and p99 latency because splitting the GPU inflates per-request service time, even without queueing pressure. At moderate load (10 RPS), SP reaches a 45.5 ms mean latency as GPU capacity reduction compounds with queue buildup, and BE 
+
+begins to exhibit higher latency. FMplex , however, exhibits latency within 4 ms of ST and achieving 30.2% and 6.3% lower mean (52.8% and 26.2% lower p99) latency than SP 
+
+and BE , respectively. At high load (20 RPS), SP increases to 118.1 ms mean latency (368.7 ms at p99), and BE to 56.4 ms mean latency (156.9 ms at p99). In contrast, FMplex remains within 12 ms of ST , widening the mean latency gap to 63.7% and 23.9% (71.6% and 33.3% w.r.t p99) over SP and BE , which widens against BE because it lacks inter-task batching, leav-ing the backbone’s batching capacity unused. These findings generalize across modalities (Figure 8). On DINOv2-Base (Figure 8a), FMplex reduces mean latency by up to 80% and 19% over SP and BE across a 1–20 RPS sweep. BE SP FMplex 2 4 6 8 10 
+
+> #Tasks
+> 0
+> 75
+> 150
+> 225
+> 300
+> Latency (ms)
+> OOM
+> 5 req/s
+
+(a) 5 RPS 2 4 6 8 10  
+
+> #Tasks
+> 0
+> 75
+> 150
+> 225
+> 300
+> Latency (ms)  OOM
+> 7 req/s
+
+(b) 7 RPS 
+
+Figure 9. Mean latency vs. number of co-located tasks on MOMENT-Large, at 5 and 7 RPS per task. BE SP FMplex 2 4 6 8 10 
+
+> #Tasks
+> 0
+> 75
+> 150
+> 225
+> 300
+> Latency (ms)
+> 5 req/s
+
+(a) DINOv2-Base 2 4 6 8 10  
+
+> #Tasks
+> 0
+> 75
+> 150
+> 225
+> 300
+> Latency (ms)
+> 2 req/s
+
+(b) Swin-Large 
+
+Figure 10. Mean latency vs. number of co-located tasks across modalities (DINOv2-Base and Swin-Large). Similarly, on Swin-Large (Figure 8b), FMplex achieves up to 57% and 7% reductions over the same baselines across a 2–10 RPS sweep. Figure 19 and Figure 20 in Appendix B show the full latency CDFs for the two backbones. These gains follow from how each approach uses the GPU and schedules requests. FMplex forms cross-task batches over a single back-bone, amortizing per-request compute across co-resident tasks. In contrast, BE runs two backbone replicas that com-pete for the GPU without coordination, thereby missing many inter-task batched opportunities. In addition, SP spa-tially partitions the GPU, reducing throughput and overall system efficiency, as we further quantify in Section 7.3. 
+
+7.2.2 Effect of FM-sharing on Resource Efficiency. We next show how FMplex scales the number of co-located tasks that a single GPU can serve, and compare against the de-ployment baselines BE and SP . Figure 9 reports mean latency as a function of the number of co-located tasks 𝑁 , swept from 𝑁 = 2 to 𝑁 = 10 on MOMENT-Large at 5 and 7 RPS per task using Poisson inter-arrival times. At 5 RPS per task, 
+
+FMplex scales smoothly to 𝑁 = 10 with mean latency nearly flat, from 28.6 ms at 𝑁 = 2 to 60.7 ms at 𝑁 = 10 . However, at 𝑁 = 4, SP experiences a substantial increase in latency, rising from 34.3 ms at 𝑁 = 2 to 114.2 ms at 𝑁 = 4. SP 
+
+collapses as its per-partition compute is exhausted by N=6, where mean latency exceeds 30 s. While BE scales smoothly, both BE and SP run out of memory at 𝑁 = 10 when the       
+
+> 9Shastri et al. 246810
+> #Tasks
+> 0
+> 20
+> 40
+> 60
+> 80
+> Throughput (RPS)
+> FMplex (No Adapter) BE FMplex
+
+Figure 11. Impact of Customization cumulative cost of 10 backbone replicas exceeds the 16 GB VRAM budget. Similarly, at 7 RPS per task, FMplex ’s mean latency grows sublinearly from 33 ms at 𝑁 = 2 to 148 ms at 
+
+𝑁 = 10 , while achieving 79% lower latency than BE at 𝑁 = 8,the maximum it can run as it reaches the memory limit. The same scaling behavior holds across modalities (Figure 10). On DINOv2-Base (Figure 10a) and Swin-Large (Figure 10b), 
+
+FMplex achieves lower latency up to 90.1% and 41.7% im-provement over BE . These gains of FMplex are because all 𝑁 
+
+tasks share a single backbone and execute as one batch per step, so per-batch GPU compute is amortized across 𝑁 tasks and total memory sublinearly increases with 𝑁 . BE replicates the backbone per task, incurring 𝑂 (𝑁 ) GPU memory and per-batch compute, which triggers the OOM. SP replicates the backbone and additionally shrinks each task’s compute partition as 𝑁 grows, thereby compounding both costs. 
+
+7.2.3 Impact of Customization. We quantify the throughput cost of per-task customization in FMplex by comparing it against BE and a variant of FMplex that serves without LoRA adapters. At 𝑁 = 2, FMplex and BE 
+
+deliver comparable throughput (23.0 RPS vs. 24.5 RPS), since contention is still limited. As 𝑁 increases, however, 
+
+FMplex ’s aggregate throughput grows from 23.0 RPS at 
+
+𝑁 = 2 to 39.5 RPS at 𝑁 = 10 (1.7×), while BE plateaus near 27 RPS and fails at 𝑁 = 10 due to memory pressure. These gains come from sharing a single base-model forward across tasks. With LoRA adapters, FMplex batches requests over the shared backbone and then executes adapter-specific computation in compatible sub-batches. This improves GPU utilization compared to per-task model invocations in BE ,but it also introduces adapter handling overhead. Relative to FMplex without adapters, which scales from 42.1 RPS to 72.7 RPS over the same range, per-task customization reduces aggregate throughput by 45% on average. 
+
+Key Takeaway. FMplex reduces latency by up to 80% over spatial partitioning and 33.3% over best-effort co-location for two tasks sharing a backbone, while improving resource efficiency as the number of co-located tasks grows. 
+
+7.3 Fair Sharing and Performance Isolation 
+
+This section evaluates whether FMplex can preserve task-level service shares and performance isolation when multiple tasks share the same FM backbone. We use BFQ (Section 4.2) BE SP            
+
+> S-BE
+> S-STFQ
+> FMplex
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Fairness
+> 0.99
+> 0.98
+> 0.99
+> 1.00
+> 0.99
+> wA:wB= 1 : 1
+> BE SP
+> S-BE
+> S-STFQ
+> FMplex
+> 0.74
+> 0.93
+> 0.74
+> 0.99
+> 0.97
+> wA:wB= 2 : 1
+> BE SP
+> S-BE
+> S-STFQ
+> FMplex
+> 0.66
+> 0.94
+> 0.69
+> 0.99
+> 0.98
+> wA:wB= 3 : 1
+> 76
+> 57
+> 83
+> 38
+> 84
+> 76
+> 56
+> 83
+> 37
+> 84
+> 0
+> 25
+> 50
+> 75
+> 100
+> Throughput (rps)
+> 76
+> 54
+> 83
+> 37
+> 83
+
+Figure 12. Task-level fairness and aggregate throughput across scheduling approaches for two MOMENT-Large tasks at 60 RPS each under configured service weights of 1:1, 2:1, and 3:1. as the runtime mechanism for enforcing weighted shares while retaining batching efficiency. 
+
+7.3.1 Task-level Fairness under FM-sharing. To eval-uate whether FMplex can provide fair resource alloca-tion without sacrificing system efficiency, we compare 
+
+FMplex against BE , SP , S-BE , and S-STFQ . Figure 12 re-ports task-level fairness and aggregate throughput when two MOMENT-Large tasks share one GPU under configured service weights of 1:1, 2:1, and 3:1. In all cases, each client issues requests at 60 RPS. In the equal-weight setting (1:1), all methods achieve nearly ideal fairness, with fairness scores between 0.98 and 1.00. BE is fair in this case because the de-fault GPU scheduler time-slices work from separate CUDA contexts in a round-robin manner [ 48 ]. The main difference is efficiency. SP achieves only 57 RPS because each task is confined to a fixed GPU partition, a non-work-conserving ap-proach that significantly affects resource efficiency. Similarly, 
+
+S-STFQ provides only 38 RPS because it disables batching, while still fair, thereby lowering system efficiency. The asymmetric-weight settings expose the limits of ap-proaches that do not schedule at the task level. With weights of 2:1 and 3:1, BE and S-BE continue to rely on unmanaged GPU sharing, so they do not track the configured 2:1 (resp. 3:1) service weights. Their fairness drops to 0.74 (resp. 0.66) for BE , and to 0.74 (resp. 0.69) for S-BE . Surprisingly, SP 
+
+cannot deliver high fairness either. Although it spatially par-titions GPU compute, memory contention still affects the underweight task. Moreover, similar to the equal-weights, 
+
+S-STFQ achieves near-perfect fairness, with fairness scores of 0.99 in both settings, but its throughput remains limited to 37 RPS because it disables batching. In contrast, FMplex 
+
+preserves fairness at 0.97 and 0.98 while sustaining 84 and 83 RPS, demonstrating that task-level scheduling within a shared FM can enforce weighted service shares without compromising batching efficiency. 
+
+7.3.2 Isolation under Noisy-Neighbor Bursts. Next, we evaluate how FMplex provides performance isolation when one task becomes a noisy neighbor. Figure 13 reports a two-task MOMENT-Large experiment with configured service weights of 3:1. Client B runs at a steady rate of 60 RPS, while 
+
+> 10
+
+FMplex : Model Virtualization for Serving Extensible Foundation Models 0           
+
+> 50
+> 100 Client A (w=3)
+> 5 rps 500 rps 5 rps
+> 050 100 150
+> Time (s)
+> 0
+> 50
+> 100 Client B (w=1)
+> 60 rps 60 rps 60 rps
+> Throughput (RPS)
+> SP S-STFQ FMplex
+
+(a) Throughput over time BE  
+
+> SP
+> S-BE
+> S-STFQ
+> FMplex
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Fairness
+> 0.65
+> 0.92
+> 0.43
+> 0.97
+> 0.99
+> 0
+> 25
+> 50
+> 75
+> 100
+> Throughput (rps)
+> 77
+> 54
+> 82
+> 27
+> 80
+
+(b) Aggregate results 
+
+Figure 13. Noisy neighbor experiment with weight (3:1) showing throughput and fairness. Client A, the high-priority client, starts at 5 RPS, spikes to 500 RPS, and then returns to 5 RPS, a pattern common in serverless and event-driven systems [ 60 ]. We compare 
+
+FMplex against BE , SP , S-BE , and S-STFQ .Figure 13a shows how each method responds over time to Client A’s burst. We omit BE and S-BE for clarity. SP limits Client B’s throughput even when Client A’s request rate is low, because Client B remains confined to a fixed GPU partition. More importantly, SP does not provide full isola-tion, where Client B’s throughput still drops when Client A increases its demand, as observed in the weighted-sharing experiment. S-STFQ keeps the two clients closer to their configured service shares, but it sacrifices efficiency because it does not exploit batching. In contrast, FMplex follows the configured 3:1 service allocation during the burst and quickly returns to the steady regime after the burst ends, preserving isolation without discarding batching. Figure 13b summa-rizes the same experiment across all approaches. FMplex 
+
+keeps the tasks close to their configured shares while retain-ing high throughput, showing that its batch-aware scheduler provides isolation against noisy-neighbor bursts without giving up the efficiency of FM sharing. 
+
+Key Takeaway. FMplex keeps tasks close to their configured shares while retaining high throughput. FMplex sustains 84 RPS at 0.97–0.98 fairness under asymmetric service weights, while non-batched fair-sharing achieves similar fairness at only 37 RPS and unmanaged sharing drops fairness to as low as 0.66. 
+
+7.4 Large-Scale Evaluation 
+
+We now evaluate the FMplex -based serving stack at 16 NVIDIA T4 GPU cluster scale using the Azure Functions trace (Section 7.1), with tasks clustered into low-, moderate-, and high-load groups. We compare the stack against BE 
+
+along two metrics: end-to-end latency under the resulting shared deployment (Figure 14) and the number of tasks the cluster can sustain (Figure 15). We omit SP here since the experiments in Section 7.2 already showed it falling behind. 0 50 100 150 200 250 300 
+
+> Time (s)
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Latency (ms)  BE
+> FMplex
+
+(a) Mean latency over time BE FMplex  
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> Latency (ms)
+> 33
+> 28
+> ↓ 15%
+
+(b) Mean latency 0 50 100 150 200 250 300 
+
+> Time (s)
+> 0
+> 250
+> 500
+> 750
+> 1000
+> 1250
+> 1500
+> 1750
+> P99 Latency (ms)  BE
+> FMplex
+
+(c) P99 latency over time BE FMplex  
+
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> 350
+> P99 Latency (ms)  302
+> 222
+> ↓ 26%
+
+(d) P99 latency 
+
+Figure 14. Latency at cluster scale on the 85-task workload: mean (top) and p99 (bottom) over time (left) and across meth-ods (right). Low Medium High 
+
+10 1
+
+10 2
+
+10 3
+
+10 4 
+
+> # Tasks Placed
+> 313 172
+> 33
+> 1.9k
+> 187
+> 37
+
+BE FMplex 
+
+Figure 15. Number of tasks the cluster can host across ap-proaches and load profiles (low, moderate, high). 
+
+7.4.1 Cluster-Scale Latency. Figure 14 reports mean and p99 latency on the 85-task workload across the two ap-proaches, both as a time series over the trace (left column) and aggregated across methods (right column). The FMplex -based stack reduces mean latency by 15% and p99 latency by 26% compared to BE , with the gap widening further during demand bursts. These gains follow from the same mecha-nisms quantified in Section 7.2 and Section 7.3, now oper-ating at cluster scale. The stack forms cross-task batches over each shared backbone and uses BFQ to enforce per-task isolation under bursts, so demand spikes from popular tasks do not propagate to co-located tasks. BE competes for GPU resources without coordination, missing batching opportu-nities and inflating tail latency. 
+
+7.4.2 Deployment Efficiency. Figure 15 reports the num-ber of tasks each approach can sustain across low, moderate, and high load profiles, averaged over 5 runs. The FMplex -based stack hosts up to 6 × more tasks at low load and 8% and 12% more at moderate and high load compared to BE . These gains have two distinct mechanisms across the load regimes. At low load, where memory is the binding constraint, the gain comes from memory amortization, with multiple tasks sharing a single backbone instance rather than each loading its own, raising the admission ceiling. At higher load, where 
+
+11 Shastri et al. 
+
+Table 3. Memory and load time are split into backbone / task-component. Latency shows mean per-request backbone and decoder inference time.                                                   
+
+> Memory (MB) Load (ms) Latency (ms) Backbone BB Task BB Task BB Task
+> Time Series
+> Moment-Large 1462 0.52 5737 24.98 23.63 0.66 Papageip 23.24 0.26 161.69 5.05 15.79 0.33
+> Vision
+> DINOv2-Base 347 0.03 817 0.17 18.86 0.37 Swin-Large 347 0.04 1001 0.18 30.89 0.35
+> LLM
+> Qwen2.5-3B 6285 -3095 -310.19 -Mistral-7B 14496 -5927 -604.34 -
+> VLM
+> Qwen2-VL-2B 4420 8.76 4492 176.53 134.51 -
+
+compute becomes the binding constraint, batched execution amortizes per-batch backbone compute across co-resident tasks, so the cluster absorbs more incoming requests before saturating. BE replicates the backbone per task and forgoes both forms of amortization, capping the number of tasks the cluster can host. 
+
+Key Takeaway. At cluster scale, the FMplex -based stack hosts up to 6 × more tasks than BE at low load and 8–12% more at moderate and high load by amortizing backbone memory and batched execution across tasks; under the same deployment model, it also reduces mean latency by 15% and p99 latency by 26%. 
+
+7.5 Microbenchmarks 7.5.1 Backbone and Task Costs. Table 3 reports per-backbone memory, load time, and inference latency on 
+
+FMplex , decomposed into the backbone (BB) and task-specific component (Task), across time-series, vision, LLM, and VLM modalities. For backbones with task-specific com-ponents, the BB component dominates memory by 1–3 or-ders of magnitude (e.g., 1462 MB vs 0.52 MB on MOMENT-Large) and load time by similar factors (5737 ms vs 25 ms). This asymmetry is what FMplex ’s deployment sharing amor-tizes (Section 7.2), since once a backbone is loaded, additional tasks add only the lightweight task component. Inference latency follows the same pattern, with BB execution domi-nating per-request cost across modalities. 
+
+7.5.2 Workload Adaptation. A key benefit of decoupling tasks from FM backbones is that FMplex can adapt by mov-ing task-specific state instead of reloading the full FM, as described in Section 5.3. Figure 16 demonstrates this benefit through the behavior of FMplex and BE for a MOMENT-Large task after a workload surge. For FMplex , a MOMENT-Large instance is already available on a different server, so 
+
+FMplex-Controller replicates the task by attaching its de-coder to that resident backbone and distributing load across 0 10 20 30 40 50 60   
+
+> Time (sec)
+> 10 1
+> 10 2
+> 10 3
+> Latency (ms)
+> 0.5s
+> 27.4s
+> Workload change Attach Decoder Start Backbone
+
+Figure 16. Adaptation latency after a workload surge in 
+
+FMplex and BE .MOMENT-Large Papageip DINOv2-Base Swin-Large  
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> Service time (ms)
+> 22.4
+> 8.9
+> 18.7
+> 30.6
+> 23.2
+> 9.0
+> 19.0
+> 30.8
+> ST FMplex
+
+Figure 17. FMplex scheduling overhead. both replicas. This path completes in 500 ms and produces only a transient increase in latency. In BE , there is no back-bone sharing, so the system must start a new MOMENT-Large instance before it can shift load 3. This start-backbone path waits until the new backbone is ready, around 58 s after the workload change. During this interval, mean latency rises by roughly two orders of magnitude, and the backlog continues to affect latency even after the backbone becomes available. The result highlights why FMplex ’s vFM abstrac-tion matters for adaptation. When a compatible physical FM already exists, adaptation operates at the task-state timescale rather than the backbone-loading timescale. 
+
+7.5.3 Overheads. Figure 17 reports per-request service time across backbones at batch-size 1, comparing execution under FMplex against direct backbone execution without the FMplex scheduler. The FMplex overhead is below 0.8 ms in all cases and 0.35 ms on average, remaining small relative to the backbone forward pass across all modalities. This overhead is dominated by per-task queue handling and BFQ ’s tag computation, both of which are independent of batch size and small compared to backbone execution time. 
+
+## 8 Related Work 
+
+Model Serving and Sharing. Model-serving systems [ 1 , 2 ,11 , 22 , 44 , 45 , 57 ] treat each model as the atomic unit of de-ployment. Systems such as Nexus [ 62 ] and AlpaServe [ 31 ]reuse engines or replicas across requests but not backbones across tasks. Adapter-sharing systems such as S-LoRA [ 64 ], Punica [ 10 ], dLoRA [ 77 ] and EdgeLoRA [ 63 ] share a LLM base across many LoRA adapters and provide highly opti-mized kernels for this case. These systems looks at the space with one backbone, one extension type and one modality. 
+
+FMplex generalizes this point to an abstraction layer, the 
+
+vFM , that admits aribitary extension type (decoders, encoders,  
+
+> 3While this can also happen for FMplex , this represents the worst-case scenario. 12
+
+FMplex : Model Virtualization for Serving Extensible Foundation Models 
+
+adapters), heterogeneous backbones and independent task lifecycles. For LLM-with-LoRA workloads, FMplex can use adapter-sharing systems as its execution backend while the vFM abstraction operates one layer above it. 
+
+Fairness and Isolation in LLM Serving. Fair scheduling has been studied recently for LLM serving, with VTC [ 65 ]and related work [ 9 , 61 ] proposing schedulers that pro-vide weighted fair scheduling across clients of a shared LLM. FMplex ’s scheduling component BFQ , is weighted fair-queueing variant applied at the vFM boundary to arbitrate among tasks sharing a backbone, Within an LLM-backed vFM, token-level schedulers such as VTC can be composed with BFQ .
+
+Virtualization and Resource Management. The vFM 
+
+abstraction extends the classical virtualization pattern of exposing logically private views of shared physical re-sources [ 12 , 37 , 40 , 53 , 70 ] to foundation models. A vFM 
+
+is a task-scoped view of the backbone, with isolation en-forced through per-task queues, accounting, and scheduling rather than replication. Classical virtualization platforms also recognized that co-located VMs share memory pages from common OS images, libraries, and applications and sharing-aware colocation algorithms can amplify this benefit through smarter placement [ 69 , 76 ]. The setting of FMplex takes this one step further, the shared substrate is the FM bbackbone itself, which dominates the memory and execution cost, and 
+
+FMplex-Controller ’s sharing-aware deployment policy is the FM-serving analog of sharing-aware VM colocation. 
+
+## 9 Conclusion 
+
+We presented FMplex , a virtualization layer for foundation-model serving that decouples downstream tasks from the physical deployment of FM backbones. Through the vFM 
+
+abstraction, FMplex lets independently customized tasks share a physical FM instance while preserving task-specific state, independent lifecycles, and task-level performance isolation. A supporting runtime scheduler and lightweight sharing-aware controller make this deployment model prac-tical across heterogeneous FMs and workloads. Across 16 foundation-model backbones and 92 downstream tasks, 
+
+FMplex reduces latency by up to 80% over spatial partition-ing and 33.3% over best-effort co-location, while hosting up to 6 × more tasks at cluster scale. Our future work will ex-plore richer placement and resource-management policies on top of the FM virtualization abstraction. 
+
+## Acknowledgments 
+
+This research is supported by National Science Foundation (NSF) grants 2213636, 2211302, 2211888, 2325956, 2213636, 2105494, 2211301, and US Army grant W911NF-17-2-0196. 
+
+## References 
+
+[1] Sohaib Ahmad, Hui Guan, Brian D. Friedman, Thomas Williams, Ramesh K. Sitaraman, and Thomas Woo. 2024. Proteus: A High-Throughput Inference-Serving System with Accuracy Scaling. In Pro-ceedings of the 29th ACM International Conference on Architectural Sup-port for Programming Languages and Operating Systems, Volume 1 (La Jolla, CA, USA) (ASPLOS ’24) . 318–334. doi: 10.1145/3617232.3624849 
+
+[2] Amazon Web Services. 2026. Amazon Bedrock. https://aws.amazon. com/bedrock/ . Accessed: 2026-05-14. [3] Abdul Fatir Ansari, Lorenzo Stella, Caner Turkmen, Xiyuan Zhang, Pedro Mercado, Huibin Shen, Oleksandr Shchur, Syama Syndar Ranga-puram, Sebastian Pineda Arango, Shubham Kapoor, Jasper Zschiegner, Danielle C. Maddix, Michael W. Mahoney, Kari Torkkola, Andrew Gordon Wilson, Michael Bohlke-Schneider, and Yuyang Wang. 2024. Chronos: Learning the Language of Time Series. Transactions on Ma-chine Learning Research (2024). https://openreview.net/forum?id= gerNCVqqtR 
+
+[4] Joshua Bakita and James H Anderson. 2023. Hardware Compute Partitioning on NVIDIA GPUs. In Proceedings of the 29th IEEE Real-Time and Embedded Technology and Applications Symposium . 54–66. [5] Charith Chandra Sai Balne, Sreyoshi Bhaduri, Tamoghna Roy, Vinija Jain, and Aman Chadha. 2024. Parameter Efficient Fine Tuning: A Com-prehensive Analysis Across Applications. arXiv:2404.13506 [cs.LG] 
+
+https://arxiv.org/abs/2404.13506 
+
+[6] Ozan Baris, Yizhuo Chen, Gaofeng Dong, Liying Han, Tomoyoshi Kimura, Pengrui Quan, Ruijie Wang, Tianchen Wang, Tarek Ab-delzaher, Mario Bergés, Paul Pu Liang, and Mani Srivastava. 2025. Foundation Models for CPS-IoT: Opportunities and Challenges. arXiv:2501.16368 [cs.LG] https://arxiv.org/abs/2501.16368 
+
+[7] Rishi Bommasani et al . 2021. On the Opportunities and Risks of Foundation Models. ArXiv (2021). https://crfm.stanford.edu/assets/ report.pdf 
+
+[8] Tom B. Brown, Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared Kaplan, Prafulla Dhariwal, Arvind Neelakantan, Pranav Shyam, Girish Sastry, Amanda Askell, Sandhini Agarwal, Ariel Herbert-Voss, Gretchen Krueger, Tom Henighan, Rewon Child, Aditya Ramesh, Daniel M. Ziegler, Jeffrey Wu, Clemens Winter, Christopher Hesse, Mark Chen, Eric Sigler, Mateusz Litwin, Scott Gray, Benjamin Chess, Jack Clark, Christopher Berner, Sam McCandlish, Alec Radford, Ilya Sutskever, and Dario Amodei. 2020. Language Models are Few-Shot Learners. arXiv:2005.14165 [cs.CL] https://arxiv.org/abs/2005.14165 
+
+[9] Shiyi Cao, Yichuan Wang, Ziming Mao, Pin-Lun Hsu, Liangsheng Yin, Tian Xia, Dacheng Li, Shu Liu, Yineng Zhang, Yang Zhou, Ying Sheng, Joseph Gonzalez, and Ion Stoica. 2025. Locality-aware Fair Scheduling in LLM Serving. arXiv:2501.14312 [cs.DC] https://arxiv.org/abs/2501. 14312 
+
+[10] Lequn Chen, Zihao Ye, Yongji Wu, Danyang Zhuo, Luis Ceze, and Arvind Krishnamurthy. 2024. Punica: Multi-Tenant LoRA Serving. In 
+
+Proceedings of Machine Learning and Systems (MLSys) .[11] Daniel Crankshaw, Xin Wang, Guilio Zhou, Michael J. Franklin, Joseph E. Gonzalez, and Ion Stoica. 2017. Clipper: A Low-Latency Online Prediction Serving System. In 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI 17) . USENIX As-sociation, Boston, MA, 613–627. https://www.usenix.org/conference/ nsdi17/technical-sessions/presentation/crankshaw 
+
+[12] R. J. Creasy. 1981. The Origin of the VM/370 Time-Sharing System. 
+
+IBM Journal of Research and Development 25, 5 (1981), 483–490. doi: 10. 1147/rd.255.0483 
+
+[13] A. Demers, S. Keshav, and S. Shenker. 1989. Analysis and Simulation of a Fair Queueing Algorithm. SIGCOMM Comput. Commun. Rev. 19, 4 (aug 1989), 1–12. doi: 10.1145/75247.75248 
+
+[14] Haoyu Dong, Hanxue Gu, Yaqian Chen, Jichen Yang, Yuwen Chen, and Maciej A. Mazurowski. 2024. Segment anything model 2: an application to 2D and 3D medical images. arXiv:2408.00756 [cs.CV] 13 Shastri et al. https://arxiv.org/abs/2408.00756 
+
+[15] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weis-senborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit, and Neil Houlsby. 2021. An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale. In International Conference on Learning Representations (ICLR) . https://openreview.net/forum?id=YicbFdNTTy 
+
+[16] R. Elliott. 2002. A measure of fairness of service for scheduling algo-rithms in multiuser systems. In IEEE CCECE2002. Canadian Confer-ence on Electrical and Computer Engineering. Conference Proceedings (Cat. No.02CH37373) , Vol. 3. 1583–1588 vol.3. doi: 10.1109/CCECE.2002. 1012991 
+
+[17] Vasilii Feofanov, Songkang Wen, Marius Alonso, Romain Ilbert, Hongbo Guo, Malik Tiomoko, Lujia Pan, Jianfeng Zhang, and Iev-gen Redko. 2025. Mantis: Lightweight Calibrated Foundation Model for User-Friendly Time Series Classification. arXiv preprint arXiv:2502.15637 (2025). [18] Théo Gnassounou, Yessin Moakher, Shifeng Xie, Vasilii Feofanov, and Ievgen Redko. 2025. Leveraging Generic Time Series Foundation Models for EEG Classification. arXiv:2510.27522 [cs.LG] https://arxiv. org/abs/2510.27522 
+
+[19] Mononito Goswami, Konrad Szafer, Arjun Choudhry, Yifu Cai, Shuo Li, and Artur Dubrawski. 2024. MOMENT: A Family of Open Time-series Foundation Models. In International Conference on Machine Learning .[20] Pawan Goyal, Harrick M. Vin, and Haichen Cheng. 1997. Start-Time Fair Queueing: A Scheduling Algorithm for Integrated Services Packet Switching Networks. IEEE/ACM Trans. Netw. 5, 5 (oct 1997), 690–704. doi: 10.1109/90.649569 
+
+[21] gRPC Authors. 2026. gRPC: A high performance open-source universal RPC framework. https://grpc.io/ . Accessed: 2026-03-26. [22] Arpan Gujarati, Reza Karimi, Safya Alzayat, Wei Hao, Antoine Kauf-mann, Ymir Vigfusson, and Jonathan Mace. 2020. Serving DNNs like Clockwork: Performance Predictability from the Bottom Up. In 14th USENIX Symposium on Operating Systems Design and Implementation (OSDI 20) . USENIX Association, 443–462. https://www.usenix.org/ conference/osdi20/presentation/gujarati 
+
+[23] Daya Guo, Dejian Yang, et al . 2025. DeepSeek-R1 incentivizes reason-ing in LLMs through Reinforcement Learning. Nature 645, 8081 (Sept. 2025), 633–638. doi: 10.1038/s41586-025-09422-z 
+
+[24] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2016. Deep Residual Learning for Image Recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition (CVPR) .[25] Neil Houlsby, Andrei Giurgiu, Stanislaw Jastrzebski, Bruna Morrone, Quentin De Laroussilhe, Andrea Gesmundo, Mona Attariyan, and Sylvain Gelly. 2019. Parameter-Efficient Transfer Learning for NLP. In 
+
+Proceedings of the 36th International Conference on Machine Learning (Proceedings of Machine Learning Research, Vol. 97) , Kamalika Chaud-huri and Ruslan Salakhutdinov (Eds.). 2790–2799. [26] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, Weizhu Chen, et al . 2022. LoRA: Low-Rank Adaptation of Large Language Models. ICLR 1, 2 (2022), 3. [27] Nan Huang, Haishuai Wang, Zihuai He, Marinka Zitnik, and Xi-ang Zhang. 2025. Repurposing Foundation Model for Generaliz-able Medical Time Series Classification. arXiv:2410.03794 [cs.LG] 
+
+https://arxiv.org/abs/2410.03794 
+
+[28] Albert Q. Jiang, Alexandre Sablayrolles, Arthur Mensch, Chris Bam-ford, Devendra Singh Chaplot, Diego de las Casas, Florian Bressand, Gianna Lengyel, Guillaume Lample, Lucile Saulnier, Lélio Renard Lavaud, Marie-Anne Lachaux, Pierre Stock, Teven Le Scao, Thibaut Lavril, Thomas Wang, Timothée Lacroix, and William El Sayed. 2023. Mistral 7B. arXiv:2310.06825 [cs.CL] https://arxiv.org/abs/2310.06825 
+
+[29] Anuj Kumar, Harish Kumar Saravanan, Shivam Dwivedi, and Pan-darasamy Arjunan. 2025. MixForecast: Mixer-Enhanced Foundation Model for Load Forecasting. In Proceedings of the 2nd International Workshop on Foundation Models for Cyber-Physical Systems & Inter-net of Things (Irvine, CA, USA) (FMSys) . 25–30. doi: 10.1145/3722565. 3727193 
+
+[30] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph E. Gonzalez, Hao Zhang, and Ion Stoica. 2023. Efficient Memory Management for Large Language Model Serving with PagedAttention. In Proceedings of the ACM SIGOPS 29th Symposium on Operating Systems Principles .[31] Zhuohan Li, Lianmin Zheng, Yinmin Zhong, Vincent Liu, Ying Sheng, Xin Jin, Yanping Huang, Zhifeng Chen, Hao Zhang, Joseph E. Gonzalez, and Ion Stoica. 2023. AlpaServe: Statistical Multiplexing with Model Parallelism for Deep Learning Serving. In 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 23) . 663–679. [32] Qianlin Liang, Walid A. Hanafy, Ahmed Ali-Eldin, and Prashant Shenoy. 2023. Model-Driven Cluster Resource Management for AI Workloads in Edge Clouds. ACM Transactions on Autonomous and Adaptive Systems 18, 1, Article 2 (mar 2023), 26 pages. doi: 10.1145/ 3582080 
+
+[33] Qianlin Liang, Walid A. Hanafy, Noman Bashir, David Irwin, and Prashant Shenoy. 2023. Energy Time Fairness: Balancing Fair Alloca-tion of Energy and Time for GPU Workloads. In 2023 IEEE/ACM Sym-posium on Edge Computing (SEC) . 53–66. doi: 10.1145/3583740.3628435 
+
+[34] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. 2023. Visual instruction tuning. In Proceedings of the 37th International Con-ference on Neural Information Processing Systems (New Orleans, LA, USA) (NIPS ’23) . Article 1516, 25 pages. [35] Shikun Liu, Edward Johns, and Andrew J. Davison. 2019. End-To-End Multi-Task Learning With Attention. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) .[36] Ze Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, and Baining Guo. 2021. Swin Transformer: Hierarchical Vision Transformer using Shifted Windows. arXiv:2103.14030 [cs.CV] 
+
+https://arxiv.org/abs/2103.14030 
+
+[37] LXC Contributors. 2026. LXC: Linux Containers. https:// linuxcontainers.org/ . Accessed: 2026-04-14. [38] Diptyaroop Maji, Kang Yang, Prashant Shenoy, Ramesh K Sitaraman, and Mani Srivastava. 2025. CarbonX: An Open-Source Tool for Com-putational Decarbonization Using Time Series Foundation Models. arXiv:2510.01521 [cs.LG] https://arxiv.org/abs/2510.01521 
+
+[39] Sourab Mangrulkar, Sylvain Gugger, Lysandre Debut, Younes Belkada, Sayak Paul, Benjamin Bossan, and Marian Tietz. 2022. PEFT: State-of-the-art Parameter-Efficient Fine-Tuning methods. https://github.com/ huggingface/peft .[40] Dirk Merkel. 2014. Docker: Lightweight Linux Containers for Consis-tent Development and Deployment. Linux Journal 2014, 239 (2014). [41] Thomas Mesnard, Cassidy Hardin, Robert Dadashi, Surya Bhupatiraju, Shreya Pathak, Laurent Sifre, Morgane Rivière, Mihir Sanjay Kale, Juliette Love, et al . 2024. Gemma: Open Models Based on Gemini Research and Technology. arXiv preprint arXiv:2403.08295 (2024). [42] Meta. 2024. Llama 3.2 Vision models. https://www.llama.com/docs/ model-cards-and-prompt-formats/llama3_2/ . Accessed: 2026-03-05. [43] Nathan Ng, Abel Souza, Ahmed Ali-Eldin, David Irwin, Don Towsley, and Prashant Shenoy. 2024. TailClipper: Reducing Tail Response Time of Distributed Services Through System-Wide Scheduling. In 
+
+Proceedings of the 2024 ACM Symposium on Cloud Computing (SoCC ’24) . 398–414. doi: 10.1145/3698038.3698554 
+
+[44] David Nigenda, Zohar Karnin, Muhammad Bilal Zafar, Raghu Rame-sha, Alan Tan, Michele Donini, and Krishnaram Kenthapadi. 2022. Amazon SageMaker Model Monitor: A System for Real-Time Insights into Deployed Machine Learning Models. In Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining 
+
+(Washington DC, USA) (KDD ’22) . Association for Computing Machin-ery, New York, NY, USA, 3671–3681. doi: 10.1145/3534678.3539145 
+
+14 FMplex : Model Virtualization for Serving Extensible Foundation Models 
+
+[45] NVIDIA. 2024. Triton Inference Server. https://developer.nvidia.com/ triton-inference-server Accessed: 2025-04-13. [46] NVIDIA Corporation. 2026. CUDA Driver API: Green Contexts . NVIDIA Corporation. https://docs.nvidia.com/cuda/cuda-driver-api/group_ _CUDA__GREEN__CONTEXTS.html Accessed: 2026-03-27. [47] NVIDIA Corporation. 2026. NVIDIA Multi-Instance GPU (MIG). https: //www.nvidia.com/en-us/technologies/multi-instance-gpu/ Accessed: 2026-03-27. [48] NVIDIA Corporation. 2026. NVIDIA Multi-Process Service . NVIDIA Corporation. https://docs.nvidia.com/deploy/mps/index.html 
+
+[49] Maxime Oquab, Timothée Darcet, Théo Moutakanni, Huy V. Vo, Marc Szafraniec, Vasil Khalidov, Pierre Fernandez, Daniel HAZIZA, Fran-cisco Massa, Alaaeldin El-Nouby, Mido Assran, Nicolas Ballas, Wo-jciech Galuba, Russell Howes, Po-Yao Huang, Shang-Wen Li, Ishan Misra, Michael Rabbat, Vasu Sharma, Gabriel Synnaeve, Hu Xu, Herve Jegou, Julien Mairal, Patrick Labatut, Armand Joulin, and Piotr Bo-janowski. 2024. DINOv2: Learning Robust Visual Features without Supervision. Transactions on Machine Learning Research (2024). [50] A.K. Parekh and R.G. Gallager. 1993. A generalized processor sharing approach to flow control in integrated services networks: the single-node case. IEEE/ACM Transactions on Networking 1, 3 (1993), 344–357. doi: 10.1109/90.234856 
+
+[51] Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, Alban Desmaison, Andreas Köpf, Edward Yang, Zach DeVito, Martin Raison, Alykhan Tejani, Sasank Chil-amkurthy, Benoit Steiner, Lu Fang, Junjie Bai, and Soumith Chintala. 2019. PyTorch: an imperative style, high-performance deep learning library .[52] Arvind Pillai, Dimitris Spathis, Fahim Kawsar, and Mohammad Malekzadeh. 2025. PaPaGei: Open Foundation Models for Optical Physiological Signals. arXiv:2410.20542 [cs.LG] https://arxiv.org/abs/ 2410.20542 
+
+[53] Gerald J. Popek and Robert P. Goldberg. 1974. Formal Requirements for Virtualizable Third Generation Architectures. Commun. ACM 17, 7 (1974), 412–421. doi: 10.1145/361011.361073 
+
+[54] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. 2021. Learn-ing Transferable Visual Models From Natural Language Supervision. In Proceedings of the 38th International Conference on Machine Learning (Proceedings of Machine Learning Research, Vol. 139) , Marina Meila and Tong Zhang (Eds.). 8748–8763. https://proceedings.mlr.press/v139/ radford21a.html 
+
+[55] Varun Rao, Youran Sun, Mahendra Kumar, Tejas Mutneja, Agastya Mukherjee, and Haizhao Yang. 2025. LLMs Meet Finance: Fine-Tuning Foundation Models for the Open FinLLM Leaderboard. arXiv:2504.13125 [cs.CL] https://arxiv.org/abs/2504.13125 
+
+[56] Joseph Redmon, Santosh Divvala, Ross Girshick, and Ali Farhadi. 2016. You Only Look Once: Unified, Real-Time Object Detection. In 
+
+Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) . 779–788. [57] Francisco Romero, Qian Li, Neeraja J. Yadwadkar, and Christos Kozyrakis. 2021. INFaaS: Automated Model-less Inference Serv-ing. In 2021 USENIX Annual Technical Conference (USENIX ATC 21) .USENIX Association, 397–411. https://www.usenix.org/conference/ atc21/presentation/romero 
+
+[58] Hasim Sak, Andrew W. Senior, and Françoise Beaufays. 2014. Long short-term memory recurrent neural network architectures for large scale acoustic modeling. In INTERSPEECH . 338–342. [59] Mahadev Satyanarayanan, Nathan Beckmann, Grace A. Lewis, and Brandon Lucia. 2021. The Role of Edge Offload for Hardware-Accelerated Mobile Devices. In Proceedings of the 22nd International Workshop on Mobile Computing Systems and Applications (Virtual, United Kingdom) (HotMobile ’21) . 22–29. doi: 10.1145/3446382.3448360 
+
+[60] Mohammad Shahrad, Rodrigo Fonseca, Inigo Goiri, Gohar Chaudhry, Paul Batum, Jason Cooke, Eduardo Laureano, Colby Tresness, Mark Russinovich, and Ricardo Bianchini. 2020. Serverless in the Wild: Characterizing and Optimizing the Serverless Workload at a Large Cloud Provider. In 2020 USENIX Annual Technical Conference (USENIX ATC 20) . USENIX Association, 205–218. https://www.usenix.org/ conference/atc20/presentation/shahrad 
+
+[61] Ao Shen, Zhiyao Li, and Mingyu Gao. 2024. FastSwitch: Optimizing Context Switching Efficiency in Fairness-aware Large Language Model Serving. arXiv:2411.18424 [cs.LG] https://arxiv.org/abs/2411.18424 
+
+[62] Haichen Shen, Lequn Chen, Yuchen Jin, Liangyu Zhao, Bingyu Kong, Matthai Philipose, Arvind Krishnamurthy, and Ravi Sundaram. 2019. Nexus: A GPU Cluster Engine for Accelerating DNN-Based Video Analysis. In Proceedings of the 27th ACM Symposium on Operating Systems Principles (Huntsville, Ontario, Canada) (SOSP ’19) . Asso-ciation for Computing Machinery, New York, NY, USA, 322–337. doi: 10.1145/3341301.3359658 
+
+[63] Zheyu Shen, Yexiao He, Ziyao Wang, Yuning Zhang, Guoheng Sun, Wanghao Ye, and Ang Li. 2025. EdgeLoRA: An Efficient Multi-Tenant LLM Serving System on Edge Devices . Association for Computing Machinery, New York, NY, USA, 138–153. https://doi.org/10.1145/ 3711875.3729141 
+
+[64] Ying Sheng, Shiyi Cao, Dacheng Li, Coleman Hooper, Nicholas Lee, Shuo Yang, Christopher Chou, Banghua Zhu, Lianmin Zheng, Kurt Keutzer, Joseph E. Gonzalez, and Ion Stoica. 2024. S-LoRA: Serving Thousands of Concurrent LoRA Adapters. arXiv:2311.03285 [cs.LG] 
+
+https://arxiv.org/abs/2311.03285 
+
+[65] Ying Sheng, Shiyi Cao, Dacheng Li, Banghua Zhu, Zhuohan Li, Danyang Zhuo, Joseph E. Gonzalez, and Ion Stoica. 2024. Fairness in Serving Large Language Models. In 18th USENIX Symposium on Operating Systems Design and Implementation (OSDI 24) . 965–988. 
+
+https://www.usenix.org/conference/osdi24/presentation/sheng 
+
+[66] Yu Shi, Zongliang Fu, Shuo Chen, Bohan Zhao, Wei Xu, Chang-shui Zhang, and Jian Li. 2025. Kronos: A Foundation Model for the Language of Financial Markets. arXiv:2508.02739 [q-fin.ST] 
+
+https://arxiv.org/abs/2508.02739 
+
+[67] Shakhrul Iman Siam, Hyunho Ahn, Li Liu, Samiul Alam, Hui Shen, Zhichao Cao, Ness Shroff, Bhaskar Krishnamachari, Mani Srivastava, and Mi Zhang. 2025. Artificial Intelligence of Things: A Survey. ACM Trans. Sen. Netw. 21, 1, Article 9 (Jan. 2025), 75 pages. doi: 10.1145/ 3690639 
+
+[68] Luigi Simeone. 2026. Time Series Foundation Models for Energy Load Forecasting on Consumer Hardware: A Multi-Dimensional Zero-Shot Benchmark. arXiv:2602.10848 [cs.LG] https://arxiv.org/abs/2602.10848 
+
+[69] Michael Sindelar, Ramesh K. Sitaraman, and Prashant Shenoy. 2011. Sharing-aware algorithms for virtual machine colocation (SPAA ’11) .Association for Computing Machinery, New York, NY, USA, 367–378. doi: 10.1145/1989493.1989554 
+
+[70] J.E. Smith and Ravi Nair. 2005. The architecture of Virtual Machines. 
+
+Computer 38, 5 (2005), 32–38. doi: 10.1109/MC.2005.173 
+
+[71] Trevor Standley, Amir Zamir, Dawn Chen, Leonidas Guibas, Jitendra Malik, and Silvio Savarese. 2020. Which tasks should be learned together in multi-task learning?. In Proceedings of the 37th International Conference on Machine Learning (ICML’20) . JMLR.org, Article 846, 13 pages. [72] Mingxing Tan and Quoc Le. 2019. EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks. In Proceedings of the 36th International Conference on Machine Learning (Proceedings of Machine Learning Research, Vol. 97) . PMLR, 6105–6114. https://proceedings. mlr.press/v97/tan19a.html 
+
+[73] Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timothée Lacroix, Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal Azhar, Aurelien Rodriguez, Armand Joulin, Edouard 15 Shastri et al. 
+
+Grave, and Guillaume Lample. 2023. LLaMA: Open and Efficient Foundation Language Models. arXiv:2302.13971 [cs.CL] https://arxiv. org/abs/2302.13971 
+
+[74] Carl A Waldspurger and William E Weihl. 1994. Lottery scheduling: Flexible Proportional-share Resource Management. In Proceedings of the 1st USENIX conference on Operating Systems Design and Implemen-tation . 1–es. [75] Peng Wang, Shuai Bai, Sinan Tan, Shijie Wang, Zhihao Fan, Jinze Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Yang Fan, Kai Dang, Mengfei Du, Xuancheng Ren, Rui Men, Dayiheng Liu, Chang Zhou, Jingren Zhou, and Junyang Lin. 2024. Qwen2-VL: Enhancing Vision-Language Model’s Perception of the World at Any Resolution. arXiv:2409.12191 [cs.CV] https://arxiv.org/abs/2409.12191 
+
+[76] Timothy Wood, Gabriel Tarasuk-Levin, Prashant Shenoy, Peter Desnoyers, Emmanuel Cecchet, and Mark D. Corner. 2009. Mem-ory buddies: exploiting page sharing for smart colocation in virtu-alized data centers. SIGOPS Oper. Syst. Rev. 43, 3 (July 2009), 27–36. doi: 10.1145/1618525.1618529 
+
+[77] Bingyang Wu, Ruidong Zhu, Zili Zhang, Peng Sun, Xuanzhe Liu, and Xin Jin. 2024. dLoRA: Dynamically Orchestrating Requests and Adapters for LoRA LLM Serving. In 18th USENIX Symposium on Oper-ating Systems Design and Implementation (OSDI 24) .[78] Lingling Xu, Haoran Xie, Si-Zhao Joe Qin, Xiaohui Tao, and Fu Lee Wang. 2023. Parameter-Efficient Fine-Tuning Methods for Pretrained Language Models: A Critical Review and Assessment. arXiv:2312.12148 [cs.CL] https://arxiv.org/abs/2312.12148 
+
+[79] Zichao Yang, Xiaodong He, Jianfeng Gao, Li Deng, and Alex Smola. 2016. Stacked Attention Networks for Image Question Answering. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) .[80] Yuan Yao, Tianyu Yu, Ao Zhang, Chongyi Wang, Junbo Cui, Hongji Zhu, Tianchi Cai, Haoyu Li, Weilin Zhao, Zhihui He, Qianyu Chen, Huarong Zhou, Zhensheng Zou, Haoye Zhang, Shengding Hu, Zhi Zheng, Jie Zhou, Jie Cai, Xu Han, Guoyang Zeng, Dahai Li, Zhiyuan Liu, and Maosong Sun. 2024. MiniCPM-V: A GPT-4V Level MLLM on Your Phone. arXiv:2408.01800 [cs.CV] https://arxiv.org/abs/2408.01800 
+
+[81] Gyeong-In Yu, Joo Seong Jeong, Geon-Woo Kim, Soojeong Kim, and Byung-Gon Chun. 2022. Orca: A Distributed Serving System for Transformer-Based Generative Models. In 16th USENIX Symposium on Operating Systems Design and Implementation (OSDI 22) . USENIX Asso-ciation, Carlsbad, CA, 521–538. https://www.usenix.org/conference/ osdi22/presentation/yu 
+
+[82] Chengliang Zhang, Minchen Yu, wei wang, and Feng Yan. 2020. En-abling Cost-Effective, SLO-Aware Machine Learning Inference Serving on Public Cloud. IEEE Transactions on Cloud Computing (2020), 1–1. doi: 10.1109/TCC.2020.3006751 
+
+[83] Zhuohang Zhu, Haodong Chen, Qiang Qu, and Vera Chung. 2025. FinCast: A Foundation Model for Financial Time-Series Forecasting. arXiv:2508.19609 [cs.LG] https://arxiv.org/abs/2508.19609 
+
+16 FMplex : Model Virtualization for Serving Extensible Foundation Models 
+
+## A Task-API Training Script 
+
+Listing 2 demonstrates a full training example using FMplex . The example constructs a task pipeline, fine-tuning it through 
+
+Task-API , and running inference. It uses the MOMENT-Base backbone with a custom encoder, an MLP decoder, and a LoRA adapter for heart rate prediction on the PPG-BP dataset. 
+
+## B Benefits of FM-sharing 
+
+This appendix complements the latency results in Section 7.2 with full latency CDFs across request rates for the two-task experiments. We report CDFs for MOMENT-Large (Figure 18), DINOv2-Base (Figure 19), and Swin-Large (Figure 20). Across all three backbones and request rates, FMplex ’s latency distribution dominates BE and SP in both the body and the tail.  
+
+> 1
+
+lora_config = LoraConfig(r=64, lora_alpha=32, target_modules=["q", "v"], lora_dropout=0.05)  
+
+> 2
+
+P=Pipeline(vMomentModelBase(model))  
+
+> 3
+
+P.add_encoder(LinearChannelCombiner(cfg={num_channels=3,new_num_channels=1}, load= True ))  
+
+> 4
+
+P.add_decoder(MLPDecoder(cfg={ 'input_dim ':1024, 'output_dim ':1, 'hidden_dim ':128},load= True ))  
+
+> 5
+
+P.attach_adapter(lora_config)  
+
+> 6
+
+P.train(dataloader_train,parts_to_train=[ 'encoder ','decoder ','adapter '],cfg=task_cfg[ 'train_config '])  
+
+> 7
+
+y_test,y_pred=P.run(dataloader_test,cfg=task_cfg[ 'inference_config ']) 
+
+Listing 2. Example of a complete Task-API training and inference pipeline attaching the Moment backbone with an MLP decoder, a linear-channel encoder, and a LoRA adapter for heart rate prediction on the PPG-BP dataset. 0 25 50 75 100 
+
+> Latency (ms)
+> 0
+> 0.25
+> 0.5
+> 0.75
+> 1
+> CDF
+
+1 req/s     
+
+> 025 50 75 100
+> Latency (ms)
+
+5 req/s     
+
+> 025 50 75 100
+> Latency (ms)
+
+10 req/s     
+
+> 025 50 75 100
+> Latency (ms)
+
+15 req/s     
+
+> 025 50 75 100
+> Latency (ms)
+
+20 req/s    
+
+> ST SP BE FMplex
+
+Figure 18. CDF across request rates for MOMENT-Large (Figure 7) 0 25 50 75 100 
+
+> Latency (ms)
+> 0
+> 0.25
+> 0.5
+> 0.75
+> 1
+> CDF
+
+1 req/s     
+
+> 025 50 75 100
+> Latency (ms)
+
+5 req/s     
+
+> 025 50 75 100
+> Latency (ms)
+
+10 req/s     
+
+> 025 50 75 100
+> Latency (ms)
+
+15 req/s     
+
+> 025 50 75 100
+> Latency (ms)
+
+20 req/s    
+
+> ST SP BE FMplex
+
+Figure 19. CDF across request rates for DINOv2-Base (Figure 8a) 
+
+> 17
+
+Shastri et al. 0 25 50 75 100 
+
+Latency (ms) 
+
+> 0
+> 0.25
+> 0.5
+> 0.75
+> 1
+> CDF
+
+2 req/s     
+
+> 025 50 75 100
+
+Latency (ms) 
+
+4 req/s     
+
+> 025 50 75 100
+
+Latency (ms) 
+
+6 req/s     
+
+> 025 50 75 100
+
+Latency (ms) 
+
+8 req/s     
+
+> 025 50 75 100
+
+Latency (ms) 
+
+10 req/s    
+
+> ST SP BE FMplex
+
+Figure 20. CDF across request rates for Swin-Large (Figure 8b) 
+
+18

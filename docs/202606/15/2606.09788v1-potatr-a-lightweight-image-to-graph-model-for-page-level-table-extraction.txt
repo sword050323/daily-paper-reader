@@ -1,0 +1,300 @@
+Title: POTATR: A Lightweight Image-to-Graph Model for Page-Level Table Extraction
+
+URL Source: https://arxiv.org/pdf/2606.09788v1
+
+Published Time: Tue, 09 Jun 2026 02:41:33 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# POTATR: A Lightweight Image-to-Graph Model for Page-Level Table Extraction 
+
+Brandon Smock, Libin Liang, Max Sokolov, Amrit Ramesh, Valerie Faucon-Morin, Tayyibah Khanam, and Maury Courtland 
+
+Kensho Technologies 
+
+{brandon.smock,maury.courtland}@kensho.com 
+
+Abstract. Large-scale document processing requires contextually aware table extraction (TE) that is both accurate and efficient. Yet current approaches require billions of parameters, hundreds of autoregressive steps, or costly API inference. Motivated by this, we introduce the Page-Object Table Transformer (POTATR), a lightweight 29M parameter image-to-graph model that extends the Table Transformer (TATR) for contextualized page-level TE. POTATR outperforms all models tested on the PubTables-v2 Single Pages benchmark—including frontier MLLMs— achieving GriTS Con of 0.964 while running over 130 × faster at roughly 300 × lower cost. Further, POTATR’s output is spatially grounded: ev-ery recognized element has a bounding box, enabling visual verification and geometric text assignment. As a result, POTATR performs unified page-level TE while composing with other models, enabling extension to scanned documents via external OCR and to full-document TE via techniques like cross-page merging. Code and models will be released. 
+
+Keywords: Page-level table extraction · Image-to-graph 1,000 10,000 
+
+Pages / hour (log scale) 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> GriTS Con
+> POTATR-29M
+> GraniteDocling-258M
+> SmolDocling-256M
+> Qwen2.5-VL-3b
+> DeepSeek-OCR 2
+> dots.ocr
+> Gemini 3.1 Pro
+> GPT-5.4
+> Claude Opus 4.6
+
+Accuracy vs. Throughput    
+
+> 30 100 1,000 10,000
+
+Pages / $1 (log scale) 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> GriTS Con
+> POTATR-29M
+> GraniteDocling-258M
+> SmolDocling-256M
+> Qwen2.5-VL-3b
+> DeepSeek-OCR 2
+> dots.ocr
+> Gemini 3.1 Pro
+> GPT-5.4
+> Claude Opus 4.6
+
+Accuracy vs. Cost Efficiency 
+
+POTATR (ours) Small VLM Frontier MLLM 
+
+Fig. 1: Accuracy vs. efficiency on PubTables-v2 Single Pages. POTATR (29M parameters) achieves the highest page-level table extraction accuracy (GriTS Con ) while being over 130 × faster and 300 × cheaper than frontier MLLMs. The y-axis uses a nonlinear scale to better separate high-accuracy models.  
+
+> arXiv:2606.09788v1 [cs.CV] 8 Jun 2026 2B. Smock et al.
+
+## 1 Introduction 
+
+Vision-language models (VLMs) [3, 10, 14, 26] have emerged as the dominant paradigm for contextually aware table extraction (TE). Such models frame TE as autoregressive text generation—producing HTML or markdown token-by-token. This has the advantage of leveraging vast amounts of structured text data for training, which has been shown to lead to strong recognition performance. However, this paradigm has several downsides. These include inherently se-quential generation, lack of structural validity guarantees, and often a lack of reliable spatial grounding for page elements. Moreover, despite their increasing effectiveness, frontier multi-modal large language models (MLLMs) can be pro-hibitively costly to deploy at scale [16]. Task-specific systems, in contrast, are orders of magnitude less expensive than multi-purpose generative models [11]. Motivated by these limitations, we explore an alternative paradigm. We in-troduce the Page-Object Table Transformer (POTATR), a lightweight 29M-parameter image-to-graph model for contextually aware page-level TE. Rather than autoregressive text generation, POTATR frames page-level TE as parallel-decoded spatial graph prediction. It extends TATR [22, 23]—a proven architec-ture for table structure recognition (TSR) on cropped tables—to the page level, adding page-specific output classes and a relation head for graph prediction. Despite being orders of magnitude smaller than VLMs, POTATR outperforms all tested models on page-level TE—including frontier MLLMs—at a fraction of the cost (Fig. 1). Our contributions: 
+
+– We introduce POTATR, a 29M-parameter model that frames page-level TE as image-to-graph prediction, jointly detecting tables, their structures, cap-tions, and footers, with hierarchical relationships between them, and every element spatially grounded. 
+
+– We show that initializing from pre-trained TSR weights provides a significant advantage over training image-to-graph models from scratch, validating the choice to extend an existing TSR model for page-level TE. 
+
+– We show that POTATR outperforms all tested models on PubTables-v2 Single Pages—including frontier MLLMs—achieving GriTS Con of 0.964 and caption text F1 of 0.979, while running over 130 × faster at 300 × lower cost. 
+
+– Finally, we show that POTATR’s modular, spatially-grounded design com-poses naturally with other specialized models, which enables system-level improvements on downstream tasks such as multi-page table extraction. Al-together, we believe this shows that small, non-autoregressive models re-main a compelling option for deploying real-world document understanding at scale. 
+
+## 2 Related Work 
+
+2.1 Table Extraction 
+
+Table extraction has traditionally decomposed into table detection on individ-ual pages followed by table structure recognition (TSR) on cropped table im-POTATR for Page-Level Table Extraction 3
+
+ages [13,17,19,22]. Several works have attempted to unify these stages in a single model, including segmentation-based approaches [15, 17], detection-based hier-archies [29], and corner-edge segmentation [2]. However, many of these methods rely on spatial heuristics or rule-based post-processing to associate detected ele-ments with their parent tables, rather than learning these relationships directly. The Table Transformer (TATR) [22, 23] is a DETR-based [4] model that achieves strong TSR on cropped tables, but is limited to processing individ-ual tables in isolation. POTATR extends TATR to full-page TE, leveraging its pre-trained weights while adding the capabilities needed for contextualized ex-traction. Most closely related to our work, the End-to-End Table Transformer (ETT) [5] extends Deformable DETR with a symmetric adjacency matrix to group de-tected structures by table membership. POTATR differs in several key respects: it predicts directed parent-child relations rather than symmetric same-table ad-jacency, leverages pre-trained TATR weights rather than training from scratch, includes caption and footer classes as first-class page elements, handles rotated tables directly in page context, and uses a lighter architecture (29M vs. ∼41M+ parameters). 
+
+2.2 Image-to-Graph Models 
+
+Image-to-graph models jointly predict objects and their relationships from im-ages. DocParser [18] applied this paradigm to document understanding, predict-ing hierarchical relationships between page elements. Relationformer [20] pro-poses a general-purpose framework based on Deformable DETR [31], using a dedicated relation token and relation head to predict edges between detected objects. EGTR [8] repurposes Deformable DETR’s internal query-key interac-tions for scene graph generation. Page-level TE is inherently hierarchical: tables contain structures (rows, columns, headers) and are associated with captions and footers. Unlike prior work, POTATR produces a full directed hierarchical graph for page-level TE, predicting not only parent-child edges between tables and their structures, but also between tables and their captions and footers. 
+
+2.3 Vision-Language Models for Document Parsing 
+
+VLMs [1, 3, 25] combine visual input with text prompts for multi-modal un-derstanding. A recent trend is toward smaller, specialized VLMs for document parsing [7, 10, 14, 26–28], which are less expensive to train and deploy. However, even these smaller models typically contain hundreds of millions to billions of parameters and are evaluated only on isolated cropped tables. In practice, document parsing often involves modular pipelines combining multiple specialized models (e.g., Docling [14]). Our work demonstrates that a much smaller specialized model (29M parameters) can outperform VLMs on 4 B. Smock et al.    
+
+> Page Image
+> ResNet-18 Backbone
+> Transformer Encoder
+> Transformer Decoder
+> Base Model Object Queries
+> Class Head
+> BBox Head
+> Relation Head
+> table, row, column, caption, footer, . . .
+> (x, y, w, h )
+> TR
+> R
+> C
+> Same Expanded New Legend:
+
+Fig. 2: POTATR architecture. POTATR extends TATR with 125 additional object queries, 10 new page-level object classes, and a relation head that predicts parent-child relationships between detected objects. Same (gray): modules unchanged from pre-trained TATR. Expanded (orange, dashed): modules with pre-trained components plus additional randomly initialized parts. New (teal): modules added in POTATR and randomly initialized. The relation head takes pairs of decoder embeddings and predicts directed edges, producing a hierarchical graph over detected page objects. 
+
+page-level TE when paired with accurate text extraction. Unlike VLMs that en-tangle structure detection with text generation, POTATR’s modular design sep-arates these concerns—yielding a component that can be integrated into broader document parsing pipelines while remaining independently upgradeable. 
+
+## 3 Method 
+
+3.1 POTATR Architecture 
+
+We extend the Table Transformer (TATR) [23] from a model for table structure recognition on individual cropped tables to a model for full-page table extraction, which we call the Page-Object Table Transformer (POTATR). The original TATR model predicts 6 object classes: table , table column , table row , table column header , table projected row header , and table spanning cell .POTATR adds 2 additional page-level classes: table caption and table footer .Because a table can be rotated within a page, POTATR also adds 8 additional classes that are the rotated counterparts of the first 8 ( i.e . table rotated and 
+
+table column rotated ), for a total of 16 classes. Since page images can have more objects to detect, we also double the number of object queries from 125 to 250. POTATR adds a relation head similar to Relationformer [20], making it an image-to-graph model. We frame relation prediction as a binary classification problem that predicts whether object 1 is the parent of object 2. We define the table object to always be the parent, while its structures (rows, columns, etc.), caption, and footer objects are children. This serves the purpose of associating captions and footers with their table, as well as grouping table structures that belong to the same table. The grouping of table structures using explicit relation prediction departs from the approach used by TATR, which instead uses bound-ing box overlap with a parent table object to determine the grouping, similar to DocParser [18]. POTATR for Page-Level Table Extraction 5
+
+POTATR as an image-to-graph architecture differs from Relationformer in two key ways. First, POTATR is based on the original DETR architecture [4], same as TATR. Relationformer and other image-to-graph models adopt De-formable DETR [31] as their base architecture. Second, POTATR simplifies the relation head, dropping the use of a relation token. We hypothesize that the rela-tion token is unnecessary when using full self-attention as in the original DETR architecture. The relation head is implemented as a three-layer MLP. The total parameter count for POTATR is 29M. The main purpose for extending TATR into POTATR rather than adopt-ing an existing image-to-graph model such as Relationformer or EGTR [8] is to leverage TATR’s pre-trained weights. We hypothesized that this would signifi-cantly boost model performance and confirm this with a small-scale experiment in Sec. 4.2. 
+
+3.2 Training 
+
+We train and evaluate on PubTables-v2 [21], a large-scale dataset for page- and document-level TE sourced from over one million PubMed articles. PubTables-v2 (PTv2) contains multiple collections, including two collections with full pages as input: PTv2 Single Pages (468k pages with 548k tables annotated with hi-erarchical relationships between tables, captions, and footers), and PTv2 Full Documents (9k documents containing 137k pages and ∼25k tables, including 9.5k multi-page tables, annotated with HTML for TSR and bounding boxes for table detection). We train POTATR in two stages. In the first stage, we train for 100 epochs on the Single Pages collection without any change to the data distribution. In the second stage, we train for an additional 35 epochs where each epoch contains an additional 2,000 table-free document pages from the Full Documents collection, as well as repeats the 10k largest tables in the Single Pages collection with different augmentation. These additions are intended to address the long tail of the data distribution. Training is conducted on 8 Nvidia T4 GPUs with a batch size of 2 per GPU, for an effective batch size of 16. The initial learning rate is 0.00005 (5e-5) with a learning rate gamma of 0.9 applied every 2 epochs. We use the default hyperparameters from TATR [22], except the weight on the “no object” class, 
+
+eos_coef , which we set to 0.1. There is also an additional relation loss with a weight of 0.05. Most weights are initialized from TATR-v1.1-Pub [23], a pre-trained model for TSR on cropped tables. The additional relation head, expanded class head, and the 125 additional object queries are randomly initialized. 
+
+## 4 Experiments 
+
+4.1 Metrics 
+
+For page-level table extraction, we evaluate using the page-level generalizations of GriTS [24] and TEDS [30] for TE, proposed by Smock et al . [21]. At the 6 B. Smock et al.                                
+
+> Table 1: Image-to-graph model comparison. To validate the choice to base POTATR on the pre-trained TATR model, we train each candidate image-to-graph model for 10 epochs on the PubTables-v2 Single Pages collection. Interestingly, the benefits of leveraging pre-trained weights from TATR-v1.1-Pub [23] extend not only to classifying the new additional object classes but also to the novel relation prediction task (edge F1), which is not part of the original TATR model.
+> Model AP50 AP75 AP GriTS Top GriTS Con Edge F1
+> Relationformer [20] 0.808 0.523 0.484 0.852 0.840 0.339 EGTR [8] 0.791 0.599 0.549 0.850 0.837 0.707
+> POTATR (ours) 0.904 0.755 0.698 0.902 0.892 0.746
+
+page-level for TE, it is no longer assumed that there is exactly one predicted table evaluated against one ground truth table, as in the traditional TSR task. Instead, each metric compares two sets of tables (predicted and ground truth) and uses the Hungarian algorithm to determine the one-to-one correspondence that maximizes their aggregate F1 score, with GriTS or TEDS used to deter-mine the score for all candidate matches between tables. This flexibility enables evaluation for methods that do not produce a bounding box prediction for a table’s location. In our case, we apply the Hungarian matching within a single page, although the same approach can be applied across an entire document. For object detection we use the standard COCO metrics and for evaluating graph prediction, we use the edge F1 metric from DocParser [18]. We use an IoU threshold of 0.8 to determine if the predicted nodes for each edge are a true positive. For caption text accuracy, we use character-level F1 based on the longest common subsequence (LCS) between predicted and ground truth caption strings. 
+
+4.2 Image-to-Graph Model Comparison 
+
+To validate which modeling approach to adopt for our full-scale training exper-iments, we compare POTATR against Relationformer [20] and EGTR [8] in a small-scale experiment. We match the parameters of Relationformer and EGTR to those of POTATR and use each model’s default losses and loss weights. All models are trained on 8 Nvidia T4 GPUs with a batch size of 2 per GPU (effec-tive batch size 16) for 10 epochs on the PubTables-v2 Single Pages collection, with an initial learning rate of 0.00005 and a learning rate gamma of 0.66. POTATR outperforms both alternatives across all metrics (Tab. 1). Inter-estingly, POTATR outperforms Relationformer and EGTR not only on object detection but also on relation prediction, despite the relation head being an en-tirely new component. This validates the choice to extend pre-trained TATR with a relation head rather than adopting an existing image-to-graph architec-ture to train from scratch. POTATR for Page-Level Table Extraction 7
+
+Table 2: Page-level table extraction. Evaluation results on the PubTables-v2 Sin-gle Pages collection. POTATR is a 29M-parameter model; all other models are evalu-ated zero-shot. The best scores among VLMs/MLLMs are underlined; the best overall scores are bolded.                                                                                           
+
+> Model GriTS Top GriTS Con Acc Top Acc Con TEDS STEDS
+> SmolDocling-256M [14] 0.2502 0.2177 0.2800 0.0298 0.5980 0.5250 GraniteDocling-258M [7] 0.7252 0.6670 0.3794 0.0829 0.6685 0.6155 Qwen2.5-VL-3b [3] 0.4672 0.3803 0.3651 0.0619 0.2859 0.2632 Granite-Vision-3.2-2b [26] 0.8015 0.7480 0.4245 0.0331 0.8665 0.8092 DeepSeek-OCR [27] 0.8629 0.8207 0.6184 0.1671 0.7996 0.7639 DeepSeek-OCR 2 [28] 0.8839 0.8386 0.5258 0.1120 0.7688 0.7263 dots.ocr [10] 0.9241 0.8991 0.6425 0.1872 0.9168 0.8743 Claude Opus 4.6 0.9146 0.9106 0.4934 0.2713 0.9073 0.8945 GPT-5.4 0.9208 0.9102 0.5461 0.2074 0.9084 0.8874 Gemini 3.1 Pro 0.9500 0.9418 0.6348 0.3524 0.9392 0.9250 POTATR + EasyOCR [9] 0.9555 0.7819 0.6595 0.0022 0.9468 0.8162 POTATR + PaddleOCR [6] 0.9607 0.8758 0.6915 0.0074 0.9528 0.8759 POTATR + docTR [12] 0.9601 0.8799 0.6707 0.0683 0.9500 0.8952 POTATR + DT 0.9665 0.9636 0.6992 0.6454 0.9565 0.9502
+
+4.3 Page-Level Table Extraction 
+
+In the next experiment, we evaluate the fully-trained version of POTATR on page-level table extraction. We compare against seven specialized document VLMs and three frontier MLLMs, all evaluated zero-shot. Unlike VLMs, POTATR separates structure detection from text recognition: its structure predictions are combined with text either extracted directly from the document (DT), as would be present in digitally-native documents, or from a separate OCR model, as needed for scanned documents. In addition to text extracted directly from the document, we evaluate POTATR with text extracted by three lightweight OCR models (EasyOCR [9], PaddleOCR [6], and docTR [12]). Results are in Tab. 2. POTATR with direct text achieves GriTS Con of 0.964— outperforming even the strongest frontier MLLM despite being a 29M-parameter model. The best frontier MLLM (Gemini 3.1 Pro, GriTS Con 0.942) outperforms POTATR paired with traditional OCR. The OCR progression (0.782 → 0.876 →
+
+0.880 → 0.964) demonstrates that POTATR’s structure recognition is already highly accurate; remaining errors are dominated by text extraction quality and are independently fixable. 
+
+4.4 Caption Text Accuracy 
+
+Caption extraction is a natural byproduct of POTATR’s spatial detection: de-tected caption bounding boxes are populated with text from the same source used for table cells. We evaluate caption text accuracy using character-level 8 B. Smock et al. 
+
+Table 3: Caption text content accuracy. Character-level LCS-based F1 on PubTables-v2 Single Pages. POTATR detects caption bounding boxes and assigns text via direct extraction (DT) or OCR; MLLMs are prompted to output caption text alongside table structure. 
+
+Model F1 Precision Recall 
+
+Claude Opus 4.6 0.9611 0.9866 0.9370 GPT-5.4 0.9658 0.9743 0.9575 Gemini 3.1 Pro 0.9774 0.9882 0.9669 POTATR + EasyOCR 0.9789 0.9830 0.9749 
+
+POTATR + PaddleOCR 0.9764 0.9799 0.9728 POTATR + docTR 0.9786 0.9828 0.9744 POTATR + DT 0.9781 0.9817 0.9746 
+
+Table 4: Inference cost and throughput. Measured on the PubTables-v2 Single Pages test set. All local models use a single NVIDIA A10G GPU (24 GB); VLMs use batched inference. Frontier MLLMs are priced via API. Local cost is based on an on-demand cloud instance priced at $2.45/hr. 
+
+Model Params Pages/hr $/1M pages 
+
+Claude Opus 4.6 — 244 $36,680 GPT-5.4 — 326 $16,800 Gemini 3.1 Pro — 393 $15,000 Qwen2.5-VL-3b 3B 386 $6,336 dots.ocr [10] 3B 572 $4,281 DeepSeek-OCR 2 [28] 3B 1,201 $2,038 SmolDocling-256M 256M 1,247 $1,963 GraniteDocling-258M 258M 1,847 $1,325 POTATR 29M 52,031 $47 
+
+LCS-based F1 (Tab. 3). POTATR with direct text achieves F1 of 0.978 with balanced precision and recall, matching the best frontier MLLM (Gemini 3.1 Pro, F1 0.977). MLLMs tend toward higher precision but lower recall—they are accurate when they output captions but occasionally omit them. POTATR’s detection-based approach ensures systematic caption coverage without requiring explicit prompting. Interestingly, caption recognition for POTATR with EasyOCR very slightly outperforms caption recognition with text extracted directly from the document itself. While the difference is very slight, it may be due to occasional whitespace captured within document-extracted text bounding boxes or minor reading order ambiguity. POTATR for Page-Level Table Extraction 91 20 21 40 41 70 71 100 101 150 151 200 201 250 250+        
+
+> Cells per page
+> 500
+> 1000
+> 1500
+> 2000
+> 2500
+> 3000
+> 3500
+> Output tokens / queries
+> Generation Cost vs. Cells per Page
+> POTATR-29M (queries)
+> dots.ocr
+> DeepSeek-OCR 2
+> Qwen2.5-VL-3b
+> GraniteDocling-258M
+> SmolDocling-256M
+> 1 20 21 40 41 70 71 100 101 150 151 200 201 250 250+
+> Cells per page
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> Time per page (seconds, batching)
+> Inference Time vs. Cells per Page
+> POTATR-29M (total)
+> dots.ocr
+> DeepSeek-OCR 2
+> Qwen2.5-VL-3b
+> GraniteDocling-258M
+> SmolDocling-256M
+
+Fig. 3: Generation cost vs. page table cell volume. Left: output tokens (or fixed queries for POTATR) as a function of cells per page. Right: inference time per page with batching. POTATR uses a constant 250 queries regardless of page content; autore-gressive VLMs generate tokens proportional to table size, leading to linearly growing cost and latency. 
+
+4.5 Inference Cost and Throughput 
+
+We compare inference cost and throughput for page-level TE (Tab. 4). POTATR processes over 52k pages per hour on a single A10G GPU—over 130 × the throughput of the fastest frontier MLLM (Gemini 3.1 Pro at 393 pages/hour) and 28 × faster than the fastest local VLM (GraniteDocling at 1,847 pages/hour). At under $50 per million pages, POTATR is roughly 300 × cheaper than the most economical frontier MLLM and 28 × cheaper than the most economical local VLM. These differences make POTATR practical for large-scale batch process-ing where even locally-deployed VLMs would be costly. This efficiency gap widens as a page’s table cell count increases (Fig. 3). POTATR’s inference time is constant at ∼21 ms regardless of cells per page. Only post-processing (text assignment)—a relatively trivial operation—scales with page table cell count. In contrast, autoregressive VLMs generate output tokens proportional to table size, with inference time growing from 1.8 s to 12 s across the same range. This makes POTATR’s throughput advantage even more pronounced on table-heavy document types, even compared with the most eco-nomical VLMs running in batch mode. 
+
+## 5 Discussion 
+
+5.1 Modularity as a Feature 
+
+POTATR’s modular design separates structure detection from text recognition, making errors decomposable and each component independently improvable. POTATR with direct text achieves GriTS Con of 0.964, leaving a total er-ror of 0.036. The gap from POTATR + docTR (0.880) to POTATR + DT 10 B. Smock et al. 
+
+(0.964) is 0.084—more than twice the remaining error with perfect text. This indicates that text recognition error dominates structure recognition error in the POTATR + docTR result, and that structure recognition is near its ceiling. The OCR progression (EasyOCR 0.782 → PaddleOCR 0.876 → docTR 0.880 →
+
+DT 0.964) confirms that a system for page-level table extraction with POTATR automatically benefits from better text extraction without retraining. VLMs entangle structure and text in a single autoregressive generation pro-cess. When a VLM produces incorrect output, it can be difficult to fully attribute the underlying cause of the error. It is also challenging to remedy each issue in isolation, as improving structure recognition risks harming text recognition and vice versa. POTATR allows each component to be improved, replaced, or up-graded independently. 
+
+5.2 From Page-Level to Document-Level TE 
+
+In practice, documents—not individual pages—are the unit of processing. As-sessing page-level models in a document-level context is therefore important for understanding real-world applicability. PubTables-v2 includes a Full Documents benchmark. But this benchmark is not intended to assess TE performance across a typical distribution of docu-ments. Instead, it is designed specifically to augment the Single Pages benchmark by focusing on documents that contain multi-page tables, which is the case where page-level models are most likely to fail. Since POTATR is trained on single pages, it has never seen tables that are split across page boundaries. Optimizing POTATR for full documents with multi-page tables is beyond the scope of this work. However, we do think it is of interest to assess the gap between fully single-page TE and complicated document-level TE involving multi-page tables. We evaluate POTATR in this context in the Appendix (Sec. C). Within a system designed to incorporate a page-level model, POTATR performs well even on multi-page tables, closing 60–73% of the gap to frontier MLLMs at roughly two orders of magnitude lower inference cost (Tab. 4). Further optimization of POTATR for out-of-distribution multi-page content, and extending the pipeline to handle within-page table part merging, could narrow the remaining gap. 
+
+## 6 Conclusion 
+
+We introduced POTATR, a 29M-parameter image-to-graph model extending the Table Transformer for page-level table extraction, which aims to address some of the shortcomings and prohibitive costs associated with autoregressive VLMs. POTATR outperforms all tested models on the PubTables-v2 Single Pages benchmark, including frontier MLLMs, achieving a GriTS Con of 0.964 while running over 130 × faster at 300 × lower cost. POTATR also achieves sim-ilar performance to frontier MLLMs on caption text recognition, with a text F1 score of 0.979. Notably, its modular design, paired with its spatially-grounded POTATR for Page-Level Table Extraction 11 
+
+recognition output, composes well with other small specialized models. Over-all, these results suggest small, non-autoregressive models remain a compelling option for real-world page-level table extraction, where their constant inference time regardless of table size offers a fundamental scaling advantage. 
+
+## 7 Limitations 
+
+POTATR is trained and evaluated on a dataset of English scientific articles from PubMed; generalization to other document types and languages remains untested. However, TATR—the model that POTATR extends—has been demon-strated to generalize across a variety of document types [23], suggesting that domain adaptation is feasible. 
+
+## References 
+
+1. Alayrac, J.B., Donahue, J., Luc, P., Miech, A., Barr, I., Hasson, Y., Lenc, K., Men-sch, A., Millican, K., Reynolds, M., et al.: Flamingo: a visual language model for few-shot learning. Advances in neural information processing systems 35 , 23716– 23736 (2022) 2. Baek, Y., Nam, D., Surh, J., Shin, S., Kim, S.: TRACE: table reconstruction aligned to corner and edges. In: International Conference on Document Analysis and Recognition. pp. 472–489. Springer (2023) 3. Bai, S., Chen, K., Liu, X., Wang, J., Ge, W., Song, S., Dang, K., Wang, P., Wang, S., Tang, J., et al.: Qwen2.5-VL technical report. arXiv preprint arXiv:2502.13923 (2025) 4. Carion, N., Massa, F., Synnaeve, G., Usunier, N., Kirillov, A., Zagoruyko, S.: End-to-end object detection with transformers. In: ECCV. pp. 213–229 (2020) 5. Choi, Y.Y., Kim, T., Kim, N., Lee, T., Joe, S.: End to end table transformer. In: International Conference on Document Analysis and Recognition. pp. 331–345. Springer (2024) 6. Cui, C., Sun, T., Lin, M., Gao, T., Zhang, Y., Liu, J., Wang, X., Zhang, Z., Zhou, C., Liu, H., et al.: PaddleOCR 3.0 technical report. arXiv preprint arXiv:2507.05595 (2025) 7. IBM-Granite: Granite Docling. https://huggingface.co/ibm-granite/granite-docling-258M (2025) 8. Im, J., Nam, J., Park, N., Lee, H., Park, S.: EGTR: Extracting graph from trans-former for scene graph generation. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 24229–24238 (2024) 9. JaidedAI: EasyOCR (09 2024), https://github.com/JaidedAI/EasyOCR 
+
+10. Li, Y., Yang, G., Liu, H., Wang, B., Zhang, C.: dots.ocr: Multilingual document layout parsing in a single vision-language model. arXiv preprint arXiv:2512.02498 (2025) 11. Luccioni, A.S., Jernite, Y., Strubell, E.: Power hungry processing: Watts driving the cost of ai deployment? In: Proceedings of the 2024 ACM Conference on Fairness, Accountability, and Transparency (FAccT). pp. 85–99. ACM (2024) 12. Mindee: docTR: Document text recognition. https://github.com/mindee/doctr 
+
+(2021) 12 B. Smock et al. 13. Nassar, A., Livathinos, N., Lysak, M., Staar, P.: Tableformer: Table structure un-derstanding with transformers. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 4614–4623 (2022) 14. Nassar, A., Marafioti, A., Omenetti, M., Lysak, M., Livathinos, N., Auer, C., Morin, L., de Lima, R.T., Kim, Y., Gurbuz, A.S., et al.: SmolDocling: An ultra-compact vision-language model for end-to-end multi-modal document conversion. arXiv preprint arXiv:2503.11576 (2025) 15. Paliwal, S.S., Vishwanath, D., Rahul, R., Sharma, M., Vig, L.: Tablenet: Deep learning model for end-to-end table detection and tabular data extraction from scanned document images. In: 2019 international conference on document analysis and recognition (ICDAR). pp. 128–133. IEEE (2019) 16. Poznanski, J., Rangapur, A., Borchardt, J., Dunkelberger, J., Huff, R., Lin, D., Wilhelm, C., Lo, K., Soldaini, L.: olmocr: Unlocking trillions of tokens in pdfs with vision language models. arXiv preprint arXiv:2502.18443 (2025) 17. Prasad, D., Gadpal, A., Kapadni, K., Visave, M., Sultanpure, K.: CascadeTabNet: An approach for end to end table detection and structure recognition from image-based documents. In: Proceedings of the IEEE/CVF conference on computer vision and pattern recognition workshops. pp. 572–573 (2020) 18. Rausch, J., Martinez, O., Bissig, F., Zhang, C., Feuerriegel, S.: Docparser: Hierar-chical document structure parsing from renderings. In: Proceedings of the AAAI Conference on Artificial Intelligence. vol. 35, pp. 4328–4338 (2021) 19. Schreiber, S., Agne, S., Wolf, I., Dengel, A., Ahmed, S.: DeepDeSTR: Deep learning for detection and structure recognition of tables in document images. In: 2017 14th IAPR international conference on document analysis and recognition (ICDAR). vol. 1, pp. 1162–1167. IEEE (2017) 20. Shit, S., Koner, R., Wittmann, B., Paetzold, J., Ezhov, I., Li, H., Pan, J., Shar-ifzadeh, S., Kaissis, G., Tresp, V., et al.: Relationformer: A unified framework for image-to-graph generation. In: European Conference on Computer Vision. pp. 422–439. Springer (2022) 21. Smock, B., Faucon-Morin, V., Sokolov, M., Liang, L., Khanam, T., Ramesh, A., Courtland, M.: PubTables-v2: A new large-scale dataset for full-page and multi-page table extraction. arXiv preprint arXiv:2512.10888 (2025) 22. Smock, B., Pesala, R., Abraham, R.: PubTables-1M: Towards comprehensive ta-ble extraction from unstructured documents. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). pp. 4634–4642 (June 2022) 23. Smock, B., Pesala, R., Abraham, R.: Aligning benchmark datasets for table struc-ture recognition. In: International Conference on Document Analysis and Recog-nition. pp. 371–386. Springer (2023) 24. Smock, B., Pesala, R., Abraham, R.: GriTS: Grid table similarity metric for ta-ble structure recognition. In: International Conference on Document Analysis and Recognition. pp. 535–549. Springer (2023) 25. Team, G., Anil, R., Borgeaud, S., Alayrac, J.B., Yu, J., Soricut, R., Schalkwyk, J., Dai, A.M., Hauth, A., Millican, K., et al.: Gemini: a family of highly capable multimodal models. arXiv preprint arXiv:2312.11805 (2023) 26. Team, G.V., Karlinsky, L., Arbelle, A., Daniels, A., Nassar, A., Alfassi, A., Wu, B., Schwartz, E., Joshi, D., Kondic, J., et al.: Granite vision: a lightweight, open-source multimodal model for enterprise intelligence. arXiv preprint arXiv:2502.09927 (2025) 27. Wei, H., Sun, Y., Li, Y.: Deepseek-ocr: Contexts optical compression. arXiv preprint arXiv:2510.18234 (2025) POTATR for Page-Level Table Extraction 13 28. Wei, H., Sun, Y., Li, Y.: Deepseek-ocr 2: Visual causal flow. arXiv preprint arXiv:2601.20552 (2026) 29. Zheng, X., Burdick, D., Popa, L., Zhong, X., Wang, N.X.R.: Global table extractor (gte): A framework for joint table identification and cell structure recognition using visual context. In: Proceedings of the IEEE/CVF winter conference on applications of computer vision. pp. 697–706 (2021) 30. Zhong, X., ShafieiBavani, E., Jimeno Yepes, A.: Image-based table recognition: data, model, and evaluation. In: European conference on computer vision. pp. 564–580. Springer (2020) 31. Zhu, X., Su, W., Lu, L., Li, B., Wang, X., Dai, J.: Deformable DETR: Deformable transformers for end-to-end object detection. In: ICLR (2021) 14 B. Smock et al. 1 20 21 40 41 70 71 100 101 150 151 200 201 250 250+ 
+
+> Cells per page
+> 0.55
+> 0.60
+> 0.65
+> 0.70
+> 0.75
+> 0.80
+> 0.85
+> 0.90
+> 0.95
+> 1.00
+> GriTS Con
+
+Accuracy vs. Page Table Cell Volume 
+
+> POTATR-29M
+> Gemini 3.1 Pro
+> Claude Opus 4.6
+> GPT-5.4
+> dots.ocr
+> DeepSeek-OCR 2
+> GraniteDocling-258M
+
+Fig. 4: Accuracy vs. page table cell count. GriTS Con for each model broken down by cells-per-page on PubTables-v2 Single Pages. 
+
+## Appendix A Licenses 
+
+We plan to open source models and code under the MIT license. 
+
+## B Accuracy vs. Page Table Cell Count 
+
+We break down GriTS Con by the number of table cells per page (Fig. 4). In-terestingly, no major trends in recognition performance emerge across models. In fact, the frontier MLLMs show somewhat increased table extraction perfor-mance as the number of table cells grows. This is despite the fact that the number of tokens generated, and thus the cost of output, significantly increases with page table cell count (Fig. 3). Furthermore, as the number of previous to-kens in a model’s context window grows with page table cell count, the amount of previous—potentially distributed—information on which the current token’s prediction might need to be conditioned grows. We speculate that this appar-ent paradox in performance could be because the page layout becomes more uniform (simpler) overall as table cell count on the page increases. Thus any increase in the probability of error due to the increased token output is offset by the increased regularity in structure. On the other hand, POTATR, which is not autoregressive, exhibits potentially more expected behavior, with performance peaking on the most typical tables in the data distribution. POTATR for Page-Level Table Extraction 15 
+
+Table 5: Multi-page table extraction. Evaluation on PubTables-v2 Full Documents containing multi-page tables. Full-document models receive all pages at once, whereas page-by-page models process each page independently. The last two rows show the effect of applying cross-page merging [21] to the page-by-page models’ output.                                                 
+
+> Model/Context GriTS Top GriTS Con Acc Top Acc Con TEDS STEDS Full document
+> Claude Opus 4.6 0.9116 0.9079 0.5799 0.2452 0.8914 0.8798 GPT-5.4 0.8865 0.8847 0.5038 0.1636 0.8563 0.8341 Gemini 3.1 Pro 0.9365 0.9309 0.4854 0.2025 0.9048 0.8905 Pages processed individually
+> dots.ocr 0.6054 0.5768 0.3958 0.1180 0.6179 0.5876 POTATR 0.6973 0.6710 0.3285 0.2038 0.6353 0.6128
+> Pages processed individually + cross-page merging
+> dots.ocr + merging 0.7772 0.7495 0.5059 0.1180 0.8022 0.7731 POTATR + merging 0.8507 0.8269 0.4234 0.2176 0.8058 0.7824
+
+## C Multi-Page Table Extraction 
+
+In this experiment, we assess the gap in performance when applying POTATR, optimized for single-page TE, to the most challenging scenario for document-level TE—documents containing multi-page tables. Initially we apply POTATR to these documents using page-by-page process-ing only. This leads to an overall GriTS Con score of 0.671. While POTATR can recognize single-page tables in these documents, any predicted table corresponds to at most only a fraction of any multi-page ground truth table, significantly lowering the achievable GriTS Con score. For reference, we also compare to the best-performing small VLM, dots.ocr, which is also single-page only and achieves a GriTS Con score of 0.577. Frontier MLLMs with full-document context, on the other hand, perform strongly: the best performing frontier model, Gemini 3.1 Pro, achieves GriTS Con of 0.931. Next, we pair dots.ocr and POTATR with a ViT-B-16 table continuation classifier [21]. This model takes as input a pair of page images and predicts whether a table spans a page boundary. When a single-page model predicts a table on both pages and the continuation model predicts a positive continuation, we merge the two table segments vertically. POTATR with cross-page merging achieves GriTS Con of 0.827, a 47.4% re-duction in error over processing pages without merging (0.671). Applying the same merging strategy to dots.ocr yields a 40.8% reduction in error. Notably, this improvement requires no retraining of the page-level model; it is achieved entirely through composition with a lightweight classifier (ViT-B-16, 86M pa-rameters) and a simple vertical concatenation rule. This addresses a substantial proportion of the gap between single-page models and frontier MLLMs on doc-uments with multi-page tables—60% for POTATR versus Gemini 3.1 Pro, and 73% for POTATR versus GPT-5.4. 16 B. Smock et al. 
+
+Cross-page table continuation prediction is near-optimal (0.995 recall), so the remaining gap is attributable to page-level extraction quality on multi-page table content (pages that POTATR never encounters during its current single-page training) and to within-page table part merging, which the current pipeline does not address. Optimizing POTATR for these out-of-distribution pages, and extending the merging strategy to handle table parts split within a single page, are clear directions for future work.

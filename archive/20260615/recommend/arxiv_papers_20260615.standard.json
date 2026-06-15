@@ -1,0 +1,1335 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-15T21:36:58.620514+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 6,
+    "deep_divecandidates": 70,
+    "deep_cap": 11,
+    "deep_selected": 11,
+    "quick_candidates": 59,
+    "quick_skim_target": 16,
+    "quick_selected": 16
+  },
+  "deep_dive": [
+    {
+      "id": "2606.09018v1",
+      "source": "arxiv",
+      "title": "MaterialClusterGS: Palette-Based Material Decomposition and Physically-Based Relighting with 2D Gaussian Splatting",
+      "abstract": "We present MaterialClusterGS, a palette-based material decomposition framework for 2D Gaussian Splatting that enables physically based relighting and material editing. Existing Gaussian inverse rendering methods typically assign independent BRDF parameters to individual primitives. While flexible, this local fitting strategy makes material recovery highly under-constrained: shadows, indirect illumination, geometric errors, and visibility residuals can be absorbed into thousands of slightly different local material estimates. Meanwhile, recent palette-based appearance methods operate solely in RGB space without modeling physical materials or illumination. To bridge this gap, we represent scene materials using a compact global palette of shared BRDF prototypes assigned via a continuous spatial material field. Without shared material structure, editing one region does not propagate consistently to others of the same material, making per-primitive decompositions impractical for editing. We jointly optimize the material field, palette prototypes, and environment lighting under a physically based rendering objective. The resulting framework recovers compact, spatially coherent attributes directly usable for material editing, relighting, and transfer.",
+      "authors": [
+        "Hao Zhang",
+        "Ang Li",
+        "Boyan Du",
+        "Junke Zhu",
+        "Fei Zhu",
+        "Meng Gai",
+        "Zhangjin Huang",
+        "Guoping Wang",
+        "Sheng Li"
+      ],
+      "primary_category": "cs.GR",
+      "categories": [
+        "cs.GR"
+      ],
+      "published": "2026-06-08T04:30:03+00:00",
+      "link": "https://arxiv.org/pdf/2606.09018v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "We present MaterialClusterGS, a palette-based material decomposition framework for 2D Gaussian Splatting that enables physically based relighting and material editing. Existing Gaussian inverse rendering methods typically assign independent BRDF parameters to individual primitive...",
+      "llm_tldr_cn": "We present MaterialClusterGS, a palette-based material decomposition framework for 2D Gaussian Splatting that enables physically based relighting and material editing. Existing Gaussian inverse rendering methods typically assign independent BRDF parameters to individual primitive...",
+      "llm_tldr": "We present MaterialClusterGS, a palette-based material decomposition framework for 2D Gaussian Splatting that enables physically based relighting and material editing. Existing Gaussian inverse rendering methods typically assign independent BRDF parameters to individual primitive...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09018v1"
+    },
+    {
+      "id": "2606.09273v1",
+      "source": "arxiv",
+      "title": "EditSSC: Toward Editable Semantic Occupancy Scenes with Unconditional Diffusion Models",
+      "abstract": "3D semantic scene generation is crucial for autonomous driving applications, yet most methods rely on complex 3D-specific architectures such as triplane encoders and adapted diffusion networks, limiting both their simplicity and their editing capabilities. We propose EditSSC, an editing-ready method for 3D semantic scene generation using 2D Bird's Eye View (BEV) representations and off-the-shelf latent diffusion network. Our approach reshapes 3D semantic occupancy grids into multi-channel BEV images and leverages the quantized autoencoder and UNet from Stable Diffusion with minimal modifications. We perform diffusion on the latents after quantization, which enables training-free editing capabilities. By exploiting class-to-code correspondences in the codebook, our method supports sketch-guided generation, inpainting, and outpainting without any retraining. On SemanticKITTI, EditSSC outperforms existing 3D-specific baselines on unconditional generation, demonstrating that well-established 2D architectures can be effectively repurposed for 3D scene generation and editing.",
+      "authors": [
+        "Fatima Balde",
+        "Raoul de Charette",
+        "Alexandre Boulch"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T09:41:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.09273v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:feed-forward-sparse-view-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "llm_tldr_en": "3D semantic scene generation is crucial for autonomous driving applications, yet most methods rely on complex 3D-specific architectures such as triplane encoders and adapted diffusion networks, limiting both their simplicity and their editing capabilities. We propose EditSSC, an ...",
+      "llm_tldr_cn": "3D semantic scene generation is crucial for autonomous driving applications, yet most methods rely on complex 3D-specific architectures such as triplane encoders and adapted diffusion networks, limiting both their simplicity and their editing capabilities. We propose EditSSC, an ...",
+      "llm_tldr": "3D semantic scene generation is crucial for autonomous driving applications, yet most methods rely on complex 3D-specific architectures such as triplane encoders and adapted diffusion networks, limiting both their simplicity and their editing capabilities. We propose EditSSC, an ...",
+      "llm_tags": [
+        "query:feed-forward-sparse-view-reconstruction"
+      ],
+      "matched_query_tag": "query:feed-forward-sparse-view-reconstruction",
+      "matched_query_text": "Methods related to DUSt3R, MASt3R, VGGT, large reconstruction models, transformer-based 3D reconstruction, or fast 3D scene reconstruction from few images.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09273v1"
+    },
+    {
+      "id": "2606.09162v1",
+      "source": "arxiv",
+      "title": "Zero-Parameter Geometric Gating for Temporally Stable Low-Altitude UAV Video Semantic Segmentation",
+      "abstract": "Video semantic segmentation for low-altitude UAVs requires temporal consistency, yet dense optical flow introduces spatially structured noise in the planar regions that dominate aerial imagery. We propose a zero-parameter geometric gate that uses RANSAC homography inlier ratios on a $16\\times16$ spatial grid to route each region to either homography or optical flow warp before fusion via Semantic Similarity Propagation. The gate requires no learned parameters -- only a median-threshold binary decision on RANSAC statistics -- adding only 211K trainable parameters (the SSP fusion layer) to a frozen backbone. On synthetic UAVid, the method achieves +4.24--4.91\\% mIoU improvement over base models across two architectures (SegFormer-b2 and Hiera-S+UPerNet). Mechanism diagnostics reveal that flow residuals in planar regions are spatially autocorrelated (Moran's I = 0.32, $p < 0.001$), predict boundary instability (Spearman $ρ= 0.66$), and that rigidification recovers temporal consistency from 62\\% to 92\\% (+29.5pp) in homography-valid regions.",
+      "authors": [
+        "Jingpu Yang",
+        "Fengxian Ji",
+        "Zhengzhao Lai",
+        "Juanfan Wu",
+        "Mingxuan Cui",
+        "Yufeng Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T07:55:31+00:00",
+      "link": "https://arxiv.org/pdf/2606.09162v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:geometric-constraints-foundation-models",
+      "llm_evidence_cn": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "canonical_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_tldr_en": "Video semantic segmentation for low-altitude UAVs requires temporal consistency, yet dense optical flow introduces spatially structured noise in the planar regions that dominate aerial imagery. We propose a zero-parameter geometric gate that uses RANSAC homography inlier ratios o...",
+      "llm_tldr_cn": "Video semantic segmentation for low-altitude UAVs requires temporal consistency, yet dense optical flow introduces spatially structured noise in the planar regions that dominate aerial imagery. We propose a zero-parameter geometric gate that uses RANSAC homography inlier ratios o...",
+      "llm_tldr": "Video semantic segmentation for low-altitude UAVs requires temporal consistency, yet dense optical flow introduces spatially structured noise in the planar regions that dominate aerial imagery. We propose a zero-parameter geometric gate that uses RANSAC homography inlier ratios o...",
+      "llm_tags": [
+        "query:geometric-constraints-foundation-models"
+      ],
+      "matched_query_tag": "query:geometric-constraints-foundation-models",
+      "matched_query_text": "Recent papers about geometric constraints, camera pose estimation, epipolar geometry, bundle adjustment, depth estimation, correspondence matching, or multi-view geometry for 3D reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09162v1"
+    },
+    {
+      "id": "2606.08970v1",
+      "source": "arxiv",
+      "title": "An Effective Router for Vision-Language Model Selection",
+      "abstract": "Vision-language models (VLMs) with varying performance and resource requirements are widely deployed, making it difficult for users to select the most appropriate one among numerous VLM candidates. Existing work reveals the performance paradox phenomenon in language models and focuses on routing methods to solve it. However, developing a router for VLM selection is still a critical yet challenging problem, which primarily faces: 1) lack of specialized data, 2) ineffective feature representation, and 3) rigid model space and costly adaptation. In this paper, we construct a multimodal dataset for VLM selection, containing the outputs of seven mainstream VLMs on 32,626 unique image-text queries. We then propose ARMS, a router for VLM selection. ARMS enhances input signals with VLM profiles, employs a simple but effective architecture to improve representations of queries and VLM capabilities. To improve ARMS' adaptation to new VLMs, we propose two extension training strategies: incremental training and independent training. Experimental results on both in-distribution and out-of-distribution test sets demonstrate the effectiveness of ARMS. In particular, using our training strategy, ARMs (only 800M in size) can adapt to a broader VLM space and defeat commercial models like GPT-4o that are hundreds of times larger in scale. Our code, models, and datasets are available in the anonymous repository.",
+      "authors": [
+        "Can Wang",
+        "Shengwei Wang",
+        "Bolin Zhang",
+        "Zhiying Tu",
+        "Dianhui Chu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-08T03:10:46+00:00",
+      "link": "https://arxiv.org/pdf/2606.08970v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:multimodal-3d-vision",
+      "llm_evidence_cn": "由检索词条 query:multimodal-3d-vision 命中",
+      "llm_evidence": "由检索词条 query:multimodal-3d-vision 命中",
+      "canonical_evidence": "由检索词条 query:multimodal-3d-vision 命中",
+      "llm_tldr_en": "Vision-language models (VLMs) with varying performance and resource requirements are widely deployed, making it difficult for users to select the most appropriate one among numerous VLM candidates. Existing work reveals the performance paradox phenomenon in language models and fo...",
+      "llm_tldr_cn": "Vision-language models (VLMs) with varying performance and resource requirements are widely deployed, making it difficult for users to select the most appropriate one among numerous VLM candidates. Existing work reveals the performance paradox phenomenon in language models and fo...",
+      "llm_tldr": "Vision-language models (VLMs) with varying performance and resource requirements are widely deployed, making it difficult for users to select the most appropriate one among numerous VLM candidates. Existing work reveals the performance paradox phenomenon in language models and fo...",
+      "llm_tags": [
+        "query:multimodal-3d-vision"
+      ],
+      "matched_query_tag": "query:multimodal-3d-vision",
+      "matched_query_text": "Recent papers about multimodal 3D vision, language-guided 3D reconstruction, open-vocabulary 3D scene understanding, semantic Gaussian Splatting, or foundation-model priors for 3D scenes.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.08970v1"
+    },
+    {
+      "id": "2606.09187v1",
+      "source": "arxiv",
+      "title": "CP4D: Compositional Physics-aware 4D Scene Generation",
+      "abstract": "4D generation (\\textit{i.e.}, dynamic 3D generation) has recently emerged as a rapidly growing research frontier due to its powerful spatiotemporal modeling capabilities. However, despite notable advances, existing approaches typically fail to capture the underlying physical principles, producing results that are both physically inconsistent and visually implausible. To overcome this limitation, we present CP4D, a novel paradigm for photorealistic 4D scene synthesis with faithful adherence to complex physical dynamics. Drawing inspiration from the compositional nature of real-world scenes, where immutable static backgrounds coexist with dynamic, physically plausible foregrounds, CP4D reformulates 4D generation as the integration of a static 3D environment with physically grounded dynamic objects. On this basis, our framework follows a three-stage pipeline: \\textbf{1)} Firstly, we leverage pre-trained expert models to generate high-fidelity 3D representations of the environment and foreground objects respectively. \\textbf{2)} Subsequently, to produce physically plausible trajectories and realistic interactions for these objects, we propose a hybrid motion synthesis strategy that integrates priors from physical simulators with the common sense embedded in video diffusion models. \\textbf{3)} Finally, we develop an automated composition mechanism that seamlessly fuses the static environment and dynamic objects into coherent, physically consistent 4D scenes. Extensive experiments demonstrate that CP4D can generate explorable and interactive 4D scenes with high visual fidelity, strong physical plausibility, and fine-grained controllability, significantly outperforming existing methods. The project page: https://anonymous.4open.science/w/CP4D/.",
+      "authors": [
+        "Hanxin Zhu",
+        "Cong Wang",
+        "Tianyu He",
+        "Long Chen",
+        "Xin Jin",
+        "Chen Gao",
+        "Zhibo Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T08:23:12+00:00",
+      "link": "https://arxiv.org/pdf/2606.09187v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:novel-view-synthesis-temporal-motion",
+      "llm_evidence_cn": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "llm_evidence": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "canonical_evidence": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "llm_tldr_en": "4D generation (\\textit{i.e.}, dynamic 3D generation) has recently emerged as a rapidly growing research frontier due to its powerful spatiotemporal modeling capabilities. However, despite notable advances, existing approaches typically fail to capture the underlying physical prin...",
+      "llm_tldr_cn": "4D generation (\\textit{i.e.}, dynamic 3D generation) has recently emerged as a rapidly growing research frontier due to its powerful spatiotemporal modeling capabilities. However, despite notable advances, existing approaches typically fail to capture the underlying physical prin...",
+      "llm_tldr": "4D generation (\\textit{i.e.}, dynamic 3D generation) has recently emerged as a rapidly growing research frontier due to its powerful spatiotemporal modeling capabilities. However, despite notable advances, existing approaches typically fail to capture the underlying physical prin...",
+      "llm_tags": [
+        "query:novel-view-synthesis-temporal-motion"
+      ],
+      "matched_query_tag": "query:novel-view-synthesis-temporal-motion",
+      "matched_query_text": "Methods for reconstructing dynamic scenes from videos or sparse views using Gaussian Splatting, neural rendering, radiance fields, or motion-aware representations.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09187v1"
+    },
+    {
+      "id": "2606.12633v1",
+      "source": "arxiv",
+      "title": "ECA: Efficient Continual Alignment for Open-Ended Image-to-Text Generation",
+      "abstract": "Incremental Learning (IL) for Open-ended Image-to-Text Generation (OpenITG) enables models to continuously generate accurate, contextually relevant text for new images while preserving previously acquired knowledge. Unlike prior studies, this paper addresses a more practical scenario in which the predominant category of visual data shifts over time as environments evolve. In this context, we introduce a new notion of continual alignment, which incrementally adapts the alignment module within pre-trained VLMs to preserve high-quality cross-modal representations. Based on this idea, we propose Efficient Continual Alignment (ECA), a novel exemplar-free IL approach for OpenITG. The key challenge is enabling the model to acquire new, task-specific features while minimizing interference with the established alignment without accessing raw data from previous tasks. To address this, ECA employs three core mechanisms: a Mixture of Query (MoQ) module that adapts task-specific query tokens, a Fisher Dynamic Expansion (FeDEx) that dynamically expands model structure based on a Fisher Information Matrix (FIM)-based metric, and an embedding dictionary with Dictionary Replay (DR) to retain past knowledge. To evaluate ECA's performance, we construct four new IL OpenITG benchmarks that better reflect real-world scenarios. Experimental results demonstrate that ECA significantly mitigates catastrophic forgetting and improves IL performance compared to baseline methods. Code and benchmarks are available at https://github.com/Snowball0823/ECA.",
+      "authors": [
+        "Jiangtao Kong",
+        "Peijun Zhao",
+        "Chun-Fu Chen",
+        "Youngwook Do",
+        "Shaohan Hu",
+        "Tianyi Zhou",
+        "Huajie Shao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-06-10T19:42:03+00:00",
+      "link": "https://arxiv.org/pdf/2606.12633v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:related-neural-rendering-3d-vision",
+      "llm_evidence_cn": "由检索词条 query:related-neural-rendering-3d-vision 命中",
+      "llm_evidence": "由检索词条 query:related-neural-rendering-3d-vision 命中",
+      "canonical_evidence": "由检索词条 query:related-neural-rendering-3d-vision 命中",
+      "llm_tldr_en": "Incremental Learning (IL) for Open-ended Image-to-Text Generation (OpenITG) enables models to continuously generate accurate, contextually relevant text for new images while preserving previously acquired knowledge. Unlike prior studies, this paper addresses a more practical scen...",
+      "llm_tldr_cn": "Incremental Learning (IL) for Open-ended Image-to-Text Generation (OpenITG) enables models to continuously generate accurate, contextually relevant text for new images while preserving previously acquired knowledge. Unlike prior studies, this paper addresses a more practical scen...",
+      "llm_tldr": "Incremental Learning (IL) for Open-ended Image-to-Text Generation (OpenITG) enables models to continuously generate accurate, contextually relevant text for new images while preserving previously acquired knowledge. Unlike prior studies, this paper addresses a more practical scen...",
+      "llm_tags": [
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "matched_query_tag": "query:related-neural-rendering-3d-vision",
+      "matched_query_text": "Papers that may benefit 3DGS-based reconstruction, sparse-view modeling, dynamic scene reconstruction, geometric reasoning, or foundation-model-assisted 3D vision.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.12633v1"
+    },
+    {
+      "id": "2606.09029v1",
+      "source": "arxiv",
+      "title": "Frequency Decoupled Framework for Screen Content Image Super-Resolution",
+      "abstract": "Methods based on implicit neural representations have demonstrated superior performance in Screen Content Image Super-Resolution (SCISR) . However, they overlooked the inherent frequency characteristics, leading to suboptimal performance. We propose a frequency decoupled framework (FDF) that rethinks SCISR from a phasor perspective by capturing structured energy in amplitude and relational continuity in phase, and jointly exploiting them with bespoke implicit representations to faithfully recover the regular textures and global configuration of Screen Content Image (SCI).   Amplitude-Phase Factorization Network (APFN) first separates images into amplitude and phase streams, where Amplitude Clustering Module (ACM) organizes sparse yet high-energy amplitude responses into representative prototypes for periodic pattern extraction, while Phase Consistency Self-Attention (PCSA) progressively reinforces configuration through continuous consistency propagation.   And Oscillation-Anharmonic Implicit Fitting Network (OAIF-Net) integrates periodic and coherent implicit representations for efficient exploitation of the periodic patterns and coherent context embedded in SCI.   Experimental results show FDF achieves state-of-the-art SCISR performance at multiple scales across four public SCI datasets. Ablation experiments further demonstrate the effectiveness of each component in extracting and exploiting periodic patterns and coherent context.",
+      "authors": [
+        "Xufei Wang",
+        "Qicheng Zhang",
+        "Qi Wu",
+        "Ziyang Gu",
+        "Shizhuang Weng"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T04:53:33+00:00",
+      "link": "https://arxiv.org/pdf/2606.09029v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Methods based on implicit neural representations have demonstrated superior performance in Screen Content Image Super-Resolution (SCISR) . However, they overlooked the inherent frequency characteristics, leading to suboptimal performance. We propose a frequency decoupled framewor...",
+      "llm_tldr_cn": "Methods based on implicit neural representations have demonstrated superior performance in Screen Content Image Super-Resolution (SCISR) . However, they overlooked the inherent frequency characteristics, leading to suboptimal performance. We propose a frequency decoupled framewor...",
+      "llm_tldr": "Methods based on implicit neural representations have demonstrated superior performance in Screen Content Image Super-Resolution (SCISR) . However, they overlooked the inherent frequency characteristics, leading to suboptimal performance. We propose a frequency decoupled framewor...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09029v1"
+    },
+    {
+      "id": "2606.09634v1",
+      "source": "arxiv",
+      "title": "ATN3D: Density-Aware LiDAR-Radar Early 3D Object Detection Under Extreme Sparsity",
+      "abstract": "3D object detection is the backbone of perception for automated vehicles (AV) and broader intelligent transportation systems applications. Long-range detection is challenging because sensing evidence is sparse; yet this ``long-range'' scenario is routine in traffic. Although >30m is often labeled long-range in computer vision, on roadways it affords only approx. 1-2s for perception and decision-making. Under such extreme sparsity, two core challenges arise. First, early multimodal fusion tends to discard sparsity information and inject noise from empty or falsely occupied cells, degrading long-range recall. Second, context-agnostic uniform channel supervision favors dense and near-range samples, leaving far and small objects under-optimized, delaying the earliest detection of distant objects. We propose ``Ask The Neighbor'' (ATN3D), a LiDAR-Radar framework tailored for sparse-range conditions. ATN3D introduces (i) Density-aware early fusion with cross-modal gating that conditions fusion on per-voxel density/sparsity and Radar evidence, (ii) Occupancy-gated neighborhood aggregation with circular kernels to aggregate only from credible cells, (iii) Evidence-conditioned channel self-attention to adapt channel weights with weather/range, and (iv) a Range-aware loss that re-balances classification and localization by distance, aligning training with distance-stratified evaluation. On the VoD benchmark across clear and foggy conditions, ATN3D surpasses strong baselines: +3.55% mAP in clear weather and +8.41% mAP under simulated heavy fog; for >30m objects, gains are +3.33% (clear) and +2.09% (heavy fog). These results indicate earlier and more reliable long-range detections under sparse sensing in on-road traffic.",
+      "authors": [
+        "Debojyoti Biswas",
+        "Xianbiao Hu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-08T15:32:29+00:00",
+      "link": "https://arxiv.org/pdf/2606.09634v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:feed-forward-sparse-view-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "llm_tldr_en": "3D object detection is the backbone of perception for automated vehicles (AV) and broader intelligent transportation systems applications. Long-range detection is challenging because sensing evidence is sparse; yet this ``long-range'' scenario is routine in traffic. Although >30m...",
+      "llm_tldr_cn": "3D object detection is the backbone of perception for automated vehicles (AV) and broader intelligent transportation systems applications. Long-range detection is challenging because sensing evidence is sparse; yet this ``long-range'' scenario is routine in traffic. Although >30m...",
+      "llm_tldr": "3D object detection is the backbone of perception for automated vehicles (AV) and broader intelligent transportation systems applications. Long-range detection is challenging because sensing evidence is sparse; yet this ``long-range'' scenario is routine in traffic. Although >30m...",
+      "llm_tags": [
+        "query:feed-forward-sparse-view-reconstruction"
+      ],
+      "matched_query_tag": "query:feed-forward-sparse-view-reconstruction",
+      "matched_query_text": "Methods related to DUSt3R, MASt3R, VGGT, large reconstruction models, transformer-based 3D reconstruction, or fast 3D scene reconstruction from few images.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09634v1"
+    },
+    {
+      "id": "2606.09278v1",
+      "source": "arxiv",
+      "title": "Internalizing Geometric Law: Learning from Solver Residuals for Precision-Critical Generation",
+      "abstract": "Large Language Models frequently hallucinate in precision-critical domains such as technical diagramming and mechanical design, where outputs must satisfy strict geometric constraints. We study open-ended geometric synthesis from natural language: translating free-form descriptions into precise constructions whose entities must simultaneously satisfy dozens of interacting constraints. To make this tractable, we release PyGeoX, a programmable geometric DSL that compiles declarative constraints into a differentiable loss, and PyGeoX-Bench, a stratified suite of 300 problems with per-constraint verifiable rewards. Using PyGeoX as a verifier, we identify a failure mode we call Outlier Gradient Masking: under global-norm rewards (any scheme that aggregates residuals through a single norm, for example, $\\exp(-\\mathrm{MSE})$), a single outlier constraint can nullify the learning signal across all others. To address this, we propose Saturating Additive Rewards (SAR), which decompose the reward into bounded per-constraint terms, preserving partial progress and ensuring consistent gradients even under severe violations. Against MSE-based rewards, the natural baseline for geometry solvers, SAR improves the hard-tier solving rate by $2.3\\times$, and the resulting 8B model is competitive with much larger frontier systems on this benchmark. We release the engine, benchmark, and data at https://github.com/Huawei-AI4Math/PyGeoX.",
+      "authors": [
+        "Rafael Cabral",
+        "Pang Zixi",
+        "Ziyi Shou",
+        "Shen Xin"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-08T09:44:31+00:00",
+      "link": "https://arxiv.org/pdf/2606.09278v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:geometric-constraints-foundation-models",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:geometric-constraints-foundation-models",
+      "llm_evidence_cn": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "canonical_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_tldr_en": "Large Language Models frequently hallucinate in precision-critical domains such as technical diagramming and mechanical design, where outputs must satisfy strict geometric constraints. We study open-ended geometric synthesis from natural language: translating free-form descriptio...",
+      "llm_tldr_cn": "Large Language Models frequently hallucinate in precision-critical domains such as technical diagramming and mechanical design, where outputs must satisfy strict geometric constraints. We study open-ended geometric synthesis from natural language: translating free-form descriptio...",
+      "llm_tldr": "Large Language Models frequently hallucinate in precision-critical domains such as technical diagramming and mechanical design, where outputs must satisfy strict geometric constraints. We study open-ended geometric synthesis from natural language: translating free-form descriptio...",
+      "llm_tags": [
+        "query:geometric-constraints-foundation-models"
+      ],
+      "matched_query_tag": "query:geometric-constraints-foundation-models",
+      "matched_query_text": "Recent papers about geometric constraints, camera pose estimation, epipolar geometry, bundle adjustment, depth estimation, correspondence matching, or multi-view geometry for 3D reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09278v1"
+    },
+    {
+      "id": "2606.10431v1",
+      "source": "arxiv",
+      "title": "Vision-Assisted Foundation Model for Solving Multi-Task Vehicle Routing Problems",
+      "abstract": "Multi-task vehicle routing problems play a critical role in enhancing efficiency across various industries and service sectors. These problems consist of multiple variants that optimize routing costs while meeting diverse customer constraints. Existing multi-task VRP solvers solely utilize a graph-based modality, limiting their ability to address variants with multiple constraints. As a format to represent complex semantics, vision modality shows great potential for encoding diverse VRP constraints. This motivates us to learn patch-level semantics from the vision images, and then integrate them into a graph-based model to solve various VRP variants simultaneously. However, directly applying this approach to multi-task VRPs presents three challenges: 1) existing VRP images lack constraint representations, which are essential for multi-task VRPs, 2) the fixed receptive field of individual patches cannot effectively accommodate varying requirements across tasks, and 3) imbalanced pixel distribution among constraints may cause the model to overlook constraints with fewer pixels. In this paper, we propose a vision-assisted foundation model (VaFM) to address these challenges. In the vision modality, input images tailored to all constraints are encoded by a convolutional neural network. The obtained patch embeddings are fused with graph-based nodes to generate solutions, with an auxiliary task designed to address the pixel-imbalanced issue. The performance of VaFM is evaluated across 16 different VRP variants. The experimental results demonstrate the superiority of VaFM over state-of-the-art methods, especially for variants with complex constraints.",
+      "authors": [
+        "Shuangchun Gui",
+        "Zhiguang Cao",
+        "Wen Song",
+        "Yew-Soon Ong"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-09T05:15:25+00:00",
+      "link": "https://arxiv.org/pdf/2606.10431v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:geometric-constraints-foundation-models"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:multimodal-3d-vision",
+      "llm_evidence_cn": "由检索词条 query:multimodal-3d-vision 命中",
+      "llm_evidence": "由检索词条 query:multimodal-3d-vision 命中",
+      "canonical_evidence": "由检索词条 query:multimodal-3d-vision 命中",
+      "llm_tldr_en": "Multi-task vehicle routing problems play a critical role in enhancing efficiency across various industries and service sectors. These problems consist of multiple variants that optimize routing costs while meeting diverse customer constraints. Existing multi-task VRP solvers sole...",
+      "llm_tldr_cn": "Multi-task vehicle routing problems play a critical role in enhancing efficiency across various industries and service sectors. These problems consist of multiple variants that optimize routing costs while meeting diverse customer constraints. Existing multi-task VRP solvers sole...",
+      "llm_tldr": "Multi-task vehicle routing problems play a critical role in enhancing efficiency across various industries and service sectors. These problems consist of multiple variants that optimize routing costs while meeting diverse customer constraints. Existing multi-task VRP solvers sole...",
+      "llm_tags": [
+        "query:multimodal-3d-vision"
+      ],
+      "matched_query_tag": "query:multimodal-3d-vision",
+      "matched_query_text": "Recent papers about multimodal 3D vision, language-guided 3D reconstruction, open-vocabulary 3D scene understanding, semantic Gaussian Splatting, or foundation-model priors for 3D scenes.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10431v1"
+    },
+    {
+      "id": "2606.09330v1",
+      "source": "arxiv",
+      "title": "Dynamic XR Rendering Offloading Based on Feature-Based Quality Assessment",
+      "abstract": "Extended Reality (XR) applications demand intensive computation and low latency, especially for real-time rendering tasks. In this letter, we present an edge-aided XR rendering testbed that dynamically offloads rendering workloads between the XR client and the edge server built upon network conditions and latency constraints. The testbed integrates a Microsoft HoloLens 2 headset, a GPU-enabled edge server, and a customized remote rendering toolkit based on the HOLO Stream SDK, enabling seamless switching between local and edge rendering modes in real time. To overcome the limitations of pixel-level quality metrics under head movements and asynchronous frame arrivals, we propose a perceptual evaluation metric based on deep feature embeddings and cosine similarity, which remains robust to spatial and temporal misalignments. Furthermore, we design a contextual bandit learning controller to adapt rendering placement decisions in real time by jointly optimizing perceptual quality and latency. Experimental results demonstrate the feasibility and performance of our testbed, validating its effectiveness in delivering high-quality and interactive XR experiences.",
+      "authors": [
+        "Sige Liu",
+        "Zhe Wang",
+        "Lavish Kamal Kumar",
+        "Yansha Deng"
+      ],
+      "primary_category": "eess.IV",
+      "categories": [
+        "eess.IV"
+      ],
+      "published": "2026-06-08T10:54:10+00:00",
+      "link": "https://arxiv.org/pdf/2606.09330v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:novel-view-synthesis-temporal-motion",
+      "llm_evidence_cn": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "llm_evidence": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "canonical_evidence": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "llm_tldr_en": "Extended Reality (XR) applications demand intensive computation and low latency, especially for real-time rendering tasks. In this letter, we present an edge-aided XR rendering testbed that dynamically offloads rendering workloads between the XR client and the edge server built u...",
+      "llm_tldr_cn": "Extended Reality (XR) applications demand intensive computation and low latency, especially for real-time rendering tasks. In this letter, we present an edge-aided XR rendering testbed that dynamically offloads rendering workloads between the XR client and the edge server built u...",
+      "llm_tldr": "Extended Reality (XR) applications demand intensive computation and low latency, especially for real-time rendering tasks. In this letter, we present an edge-aided XR rendering testbed that dynamically offloads rendering workloads between the XR client and the edge server built u...",
+      "llm_tags": [
+        "query:novel-view-synthesis-temporal-motion"
+      ],
+      "matched_query_tag": "query:novel-view-synthesis-temporal-motion",
+      "matched_query_text": "Methods for reconstructing dynamic scenes from videos or sparse views using Gaussian Splatting, neural rendering, radiance fields, or motion-aware representations.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09330v1"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.09110v1",
+      "source": "arxiv",
+      "title": "HDRAgent: An Agentic Framework for Multi-Exposure HDR Imaging",
+      "abstract": "Most existing multi-exposure HDR methods follow a fixed feed-forward reconstruction paradigm, making them prone to ghosting artifacts in complex dynamic scenes. To address this issue, we propose HDRAgent, the first agent-driven framework for HDR imaging, which adaptively selects reconstruction strategies according to the current scene conditions. Specifically, to provide scene-specific prior knowledge, we introduce a fine-grained contextual knowledge matching (FCM) module. This module leverages multimodal large language model (MLLM)-derived scene perception to retrieve relevant historical cases and tool knowledge, organizing them into structured evidence for MLLM-based adaptive tool scheduling. In addition, we propose a perception--distortion feedback mechanism that transforms post-execution quality assessment and artifact diagnosis into structured feedback, which is accumulated in historical memory to help subsequent contextual knowledge refinement and strategy selection. Furthermore, considering that extreme motion can invalidate alignment methods, we design an agent-guided generative alignment strategy that uses MLLM-based dynamic-region parsing to reconstruct unreliable contents in non-reference frames under reference-frame guidance. Experiments demonstrate that HDRAgent effectively reduces ghosting and local artifacts while achieving competitive or superior objective performance and visual quality.",
+      "authors": [
+        "Weiyu Zhou",
+        "Tao Hu",
+        "Yijian Wang",
+        "Xiaogang Xu",
+        "Ruixing Wang",
+        "Qingsen Yan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T07:00:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.09110v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Most existing multi-exposure HDR methods follow a fixed feed-forward reconstruction paradigm, making them prone to ghosting artifacts in complex dynamic scenes. To address this issue, we propose HDRAgent, the first agent-driven framework for HDR imaging, which adaptively selects ...",
+      "llm_tldr_cn": "Most existing multi-exposure HDR methods follow a fixed feed-forward reconstruction paradigm, making them prone to ghosting artifacts in complex dynamic scenes. To address this issue, we propose HDRAgent, the first agent-driven framework for HDR imaging, which adaptively selects ...",
+      "llm_tldr": "Most existing multi-exposure HDR methods follow a fixed feed-forward reconstruction paradigm, making them prone to ghosting artifacts in complex dynamic scenes. To address this issue, we propose HDRAgent, the first agent-driven framework for HDR imaging, which adaptively selects ...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09110v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.09156v1",
+      "source": "arxiv",
+      "title": "OmniGen-AR: AutoRegressive Any-to-Image Generation",
+      "abstract": "Autoregressive (AR) models have demonstrated strong potential in visual generation, offering superior performance with simple architectures and optimization objectives. However, existing methods are typically limited to single-modality conditions, e.g., text, restricting their applicability in real-world scenarios that demand image synthesis from diverse controls. In this work, we present OmniGen-AR, a unified autoregressive framework for Any-to-Image generation. By discretizing various visual conditions through a shared visual tokenizer and text prompts with a text tokenizer, OmniGen-AR supports a broad spectrum of conditional inputs within a single model, including text (text-to-image generation), spatial signals (segmentation-to-image and depth-to-image), and visual context (image editing, frame prediction, and text-to-video generation). To mitigate the risk of information leakage from condition tokens to content tokens, we introduce Disentangled Causal Attention (DCA), which separates the full-sequence causal mask into condition causal attention and content causal attention. It serves as a training-time regularizer without affecting the standard next-token prediction during inference. With this design, OmniGen-AR achieves new state-of-the-art or at least competitive results across a range of benchmark, e.g., 0.63 on GenEval and 80.02 on VBench, demonstrating its effectiveness in flexible and high-fidelity visual generation.",
+      "authors": [
+        "Junke Wang",
+        "Xun Wang",
+        "Qiushan Guo",
+        "Peize Sun",
+        "Weilin Huang",
+        "Zuxuan Wu",
+        "Yu-Gang Jiang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T07:47:53+00:00",
+      "link": "https://arxiv.org/pdf/2606.09156v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Autoregressive (AR) models have demonstrated strong potential in visual generation, offering superior performance with simple architectures and optimization objectives. However, existing methods are typically limited to single-modality conditions, e.g., text, restricting their ap...",
+      "llm_tldr_cn": "Autoregressive (AR) models have demonstrated strong potential in visual generation, offering superior performance with simple architectures and optimization objectives. However, existing methods are typically limited to single-modality conditions, e.g., text, restricting their ap...",
+      "llm_tldr": "Autoregressive (AR) models have demonstrated strong potential in visual generation, offering superior performance with simple architectures and optimization objectives. However, existing methods are typically limited to single-modality conditions, e.g., text, restricting their ap...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Recent papers about 3D Gaussian Splatting for panoramic reconstruction, 360-degree scene reconstruction, omnidirectional images, fisheye cameras, or large field-of-view novel view synthesis.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09156v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.09250v1",
+      "source": "arxiv",
+      "title": "LiteVSR: Lightweight Adaptation of Frozen Diffusion Transformers for Video Super-Resolution",
+      "abstract": "Adapting large-scale pre-trained video generators for Video Super-Resolution (VSR) in novel domains remains computationally prohibitive. Methods that reformulate generation as direct Low-Quality to High-Quality mappings deviate from the original generative formulation, demanding extensive fine-tuning. ControlNet-style adapters lose their efficiency under modern Diffusion Transformers since the absence of encoder-decoder hierarchy forces duplication of the entire backbone. We observe that flow matching offers a principled alternative for cross-domain VSR adaptation. By predicting a constant velocity field across all timesteps, the adaptation task reduces to learning a fixed injection pattern rather than time-varying transformations. Building on this insight, we propose LiteVSR, a minimalist framework that performs VSR using a completely frozen Diffusion Transformer with a lightweight State-Aware Adapter. The adapter employs a dual-stream architecture that extracts static structural cues from the LQ input and dynamic cues from intermediate denoising states, aligning them through time-dependent cross-attention to enable adaptive transition from structural alignment to texture refinement as denoising proceeds. LiteVSR achieves competitive restoration quality with only 11.25% trainable parameters and 12 GPU-hours of training on a single A100, while maintaining fast sampling (down to a single step) compatibility.",
+      "authors": [
+        "Yu Cao",
+        "Ziquan Liu",
+        "Zhensong Zhang",
+        "Jiankang Deng",
+        "Shaogang Gong",
+        "Jifei Song"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T09:23:42+00:00",
+      "link": "https://arxiv.org/pdf/2606.09250v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Adapting large-scale pre-trained video generators for Video Super-Resolution (VSR) in novel domains remains computationally prohibitive. Methods that reformulate generation as direct Low-Quality to High-Quality mappings deviate from the original generative formulation, demanding ...",
+      "llm_tldr_cn": "Adapting large-scale pre-trained video generators for Video Super-Resolution (VSR) in novel domains remains computationally prohibitive. Methods that reformulate generation as direct Low-Quality to High-Quality mappings deviate from the original generative formulation, demanding ...",
+      "llm_tldr": "Adapting large-scale pre-trained video generators for Video Super-Resolution (VSR) in novel domains remains computationally prohibitive. Methods that reformulate generation as direct Low-Quality to High-Quality mappings deviate from the original generative formulation, demanding ...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09250v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.09303v1",
+      "source": "arxiv",
+      "title": "Reason Twice: Segmentation via Candidate Discovery and Comparative Reasoning",
+      "abstract": "The rapid development of pretrained foundation models has enabled more general image segmentation. Multimodal large language models (MLLMs) have been widely explored for image segmentation with complex queries that require high-level reasoning. Despite promising progress, existing methods are often constrained by limited training data and the gap between MLLMs and mask generation modules. To better transfer MLLMs' perception and reasoning ability to complex reasoning-based segmentation tasks, we propose a two-stage framework Rea2Seg for mask generation and selection. Specifically, the framework first identifies potential regions as candidate masks based on the attention maps of a segmentation MLLM. It then employs an MLLM to reason over the question and candidate masks and assign scores to each mask. The final segmentation result is obtained by reranking the candidates and selecting the highest-scoring mask, reformulating image segmentation as candidate discovery followed by discriminative mask selection.   We also notice that a large portion of questions in existing benchmarks focus on commonsense reasoning, and these questions usually do not fully require joint visual observation and reasoning. To address this issue, we introduce a new benchmark called ReasonSeg-SGDR that comprehensively evaluates a model's perception, grounding, and reasoning abilities across multiple dimensions, including discriminative recognition, spatial reasoning, geometric reasoning, and multi-step reasoning, with fine-grained mask generation.   In addition, we collect training data to enhance MLLMs' ability to jointly understand multimodal queries and candidate masks, and to assign scores through reasoning. Experimental results on the proposed benchmark and ReasonSeg demonstrate the effectiveness of the unified mask generation and selection framework.",
+      "authors": [
+        "Xinyan Gao",
+        "Haoran Hao",
+        "Xiangyu Yue"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T10:10:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.09303v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "The rapid development of pretrained foundation models has enabled more general image segmentation. Multimodal large language models (MLLMs) have been widely explored for image segmentation with complex queries that require high-level reasoning. Despite promising progress, existin...",
+      "llm_tldr_cn": "The rapid development of pretrained foundation models has enabled more general image segmentation. Multimodal large language models (MLLMs) have been widely explored for image segmentation with complex queries that require high-level reasoning. Despite promising progress, existin...",
+      "llm_tldr": "The rapid development of pretrained foundation models has enabled more general image segmentation. Multimodal large language models (MLLMs) have been widely explored for image segmentation with complex queries that require high-level reasoning. Despite promising progress, existin...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09303v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.09516v1",
+      "source": "arxiv",
+      "title": "SwiftVR: Real-Time One-Step Generative Video Restoration",
+      "abstract": "Real-time video restoration (VR) for live streams requires high-resolution outputs under strict per-frame latency constraints. Existing one-step diffusion-based VR models remain difficult to deploy on consumer-grade GPUs due to two main bottlenecks: quadratic spatial attention at high resolutions and the latency-memory overhead of large video autoencoders. We present SwiftVR, a streaming one-step generative VR framework that reduces both bottlenecks under a causal chunk-wise protocol. For attention, mask-free shifted-window self-attention gathers each spatial window into a dense tensor via deterministic indexing, keeping all attention calls on the dense scaled dot-product attention path without masks, cyclic shifts, padding, or hardware-specific sparse kernels. Because SwiftVR uses only standard dense SDPA calls, the trained model transfers to consumer GPUs without retraining or custom kernels. For autoencoding, a lightweight Restoration-aware Autoencoder enables fast chunk-wise decoding while preserving reconstruction quality. On a single H100, SwiftVR sustains 31~FPS at 2560x1440 and 14~FPS at 3840x2160, whereas all compared diffusion-based VR baselines exceed the memory limit at 4K. On a consumer RTX~5090, SwiftVR reaches 26~FPS at 1920x1080. To our knowledge, SwiftVR is the first generative VR model to achieve real-time 1080p streaming on a consumer-grade GPU, while attaining strong no-reference perceptual quality with lower inference cost. Project is available at https://h-oliday.github.io/SwiftVR.",
+      "authors": [
+        "Jiaqi Yan",
+        "Xiangyu Chen",
+        "Xinlin Zhong",
+        "Haibin Huang",
+        "Chi Zhang",
+        "Jie Liu",
+        "Jiantao Zhou",
+        "Xuelong Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T14:07:29+00:00",
+      "link": "https://arxiv.org/pdf/2606.09516v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Real-time video restoration (VR) for live streams requires high-resolution outputs under strict per-frame latency constraints. Existing one-step diffusion-based VR models remain difficult to deploy on consumer-grade GPUs due to two main bottlenecks: quadratic spatial attention at...",
+      "llm_tldr_cn": "Real-time video restoration (VR) for live streams requires high-resolution outputs under strict per-frame latency constraints. Existing one-step diffusion-based VR models remain difficult to deploy on consumer-grade GPUs due to two main bottlenecks: quadratic spatial attention at...",
+      "llm_tldr": "Real-time video restoration (VR) for live streams requires high-resolution outputs under strict per-frame latency constraints. Existing one-step diffusion-based VR models remain difficult to deploy on consumer-grade GPUs due to two main bottlenecks: quadratic spatial attention at...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09516v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.09643v1",
+      "source": "arxiv",
+      "title": "FMplex: Model Virtualization for Serving Extensible Foundation Models",
+      "abstract": "Foundation models (FMs) are increasingly used as backbones for downstream tasks across language, vision, time-series, and multimodal applications. Yet existing model-serving systems deploy each customized task as an independent model instance, thereby replicating heavyweight backbones, wasting accelerator memory, and losing opportunities to amortize batching and loading costs. This paper presents FMplex, a serving system that treats FM backbones as a virtualization substrate for deployment sharing. FMplex presents each task with a virtual foundation model (vFM), a logically private FM instance backed by a shared physical FM. This abstraction lets independently customized tasks share a backbone while preserving task-specific extensions, independent lifecycles, and task-level isolation. In addition, we propose a batch-aware fair-queueing scheduler that combines weighted task-level sharing with inter- and intra-task batching across colocated tasks. We implement a FMplex-based serving stack spanning task construction, sharing-aware deployment, and runtime execution. Across 7 FM backbones (16 variants) and 92 downstream tasks, FMplex reduces latency by up to 80% over spatial partitioning and 33.3% over best-effort co-location, while hosting up to 6x more tasks at cluster scale.",
+      "authors": [
+        "Hetvi Shastri",
+        "Pragya Sharma",
+        "Walid A. Hanafy",
+        "David Irwin",
+        "Mani Srivastava",
+        "Prashant Shenoy"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.AI",
+        "cs.LG",
+        "cs.OS"
+      ],
+      "published": "2026-06-08T15:38:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.09643v1",
+      "tags": [
+        "keyword:geometric-constraints-foundation-models"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:geometric-constraints-foundation-models",
+      "llm_evidence_cn": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "canonical_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_tldr_en": "Foundation models (FMs) are increasingly used as backbones for downstream tasks across language, vision, time-series, and multimodal applications. Yet existing model-serving systems deploy each customized task as an independent model instance, thereby replicating heavyweight back...",
+      "llm_tldr_cn": "Foundation models (FMs) are increasingly used as backbones for downstream tasks across language, vision, time-series, and multimodal applications. Yet existing model-serving systems deploy each customized task as an independent model instance, thereby replicating heavyweight back...",
+      "llm_tldr": "Foundation models (FMs) are increasingly used as backbones for downstream tasks across language, vision, time-series, and multimodal applications. Yet existing model-serving systems deploy each customized task as an independent model instance, thereby replicating heavyweight back...",
+      "llm_tags": [
+        "query:geometric-constraints-foundation-models"
+      ],
+      "matched_query_tag": "query:geometric-constraints-foundation-models",
+      "matched_query_text": "Papers that combine foundation models, visual correspondence, monocular depth, semantic priors, or multimodal models with 3D reconstruction and novel view synthesis.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09643v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.09738v1",
+      "source": "arxiv",
+      "title": "HDSL: A Hierarchical Domain-Specific Language for Structured 3D Indoor Scene Generation and Localized Editing with LLM Agents",
+      "abstract": "Text-driven indoor scene generation and editing require an intermediate representation that language models can both produce and revise. Existing LLM-based systems often rely on scene graphs or global constraint lists, which are compact but underspecify local geometry and make instruction-based edits difficult to localize. We frame this problem as structured program generation and local program repair, and propose Hierarchical Descriptive Scene Language (HDSL), an XML/CSS-style domain-specific language for structured 3D indoor scenes. HDSL represents rooms, regions, objects, and support surfaces as a tree with local coordinates, making complex scenes easier to plan recursively and easier to retrieve for editing. Our pipeline uses LLM agents to generate HDSL subtrees with bounded verification, grounds non-virtual nodes through multimodal asset retrieval, and applies force-directed layout optimization to repair boundary and collision errors. For editing, Hierarchical Retrieval-Augmented Generation retrieves the relevant subtree, asks the LLM to rewrite only that local context, and merges the result back through a deterministic three-way merge. In our reproduced benchmark, HDSL improves average object coverage, text-scene alignment, and generation time over full text-to-scene baselines while remaining competitive with recent layout-only reproductions on geometry metrics; for editing, HRAG reduces token use by $5.22\\times$ and runtime by $6.19\\times$, produces valid DSL for all eight paired edits, and better preserves unrelated scene objects.",
+      "authors": [
+        "Letian Li",
+        "Chao Shen",
+        "Shuzhao Xie",
+        "Chenghao Gu",
+        "ZhengXiao He",
+        "Yu Meng",
+        "Xin Yang",
+        "Wenyuan Jiang",
+        "Zhi Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T17:02:36+00:00",
+      "link": "https://arxiv.org/pdf/2606.09738v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Text-driven indoor scene generation and editing require an intermediate representation that language models can both produce and revise. Existing LLM-based systems often rely on scene graphs or global constraint lists, which are compact but underspecify local geometry and make in...",
+      "llm_tldr_cn": "Text-driven indoor scene generation and editing require an intermediate representation that language models can both produce and revise. Existing LLM-based systems often rely on scene graphs or global constraint lists, which are compact but underspecify local geometry and make in...",
+      "llm_tldr": "Text-driven indoor scene generation and editing require an intermediate representation that language models can both produce and revise. Existing LLM-based systems often rely on scene graphs or global constraint lists, which are compact but underspecify local geometry and make in...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09738v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.09788v1",
+      "source": "arxiv",
+      "title": "POTATR: A Lightweight Image-to-Graph Model for Page-Level Table Extraction",
+      "abstract": "Large-scale document processing requires contextually aware table extraction (TE) that is both accurate and efficient. Yet current approaches require billions of parameters, hundreds of autoregressive steps, or costly API inference. Motivated by this, we introduce the Page-Object Table Transformer (POTATR), a lightweight 29M parameter image-to-graph model that extends the Table Transformer (TATR) for contextualized page-level TE. POTATR outperforms all models tested on the PubTables-v2 Single Pages benchmark -- including frontier MLLMs -- achieving $\\textrm{GriTS}_\\textrm{Con}$ of 0.964 while running over 130$\\times$ faster at roughly 300$\\times$ lower cost. Further, POTATR's output is spatially grounded: every recognized element has a bounding box, enabling visual verification and geometric text assignment. As a result, POTATR performs unified page-level TE while composing with other models, enabling extension to scanned documents via external OCR and to full-document TE via techniques like cross-page merging. Code and models will be released.",
+      "authors": [
+        "Brandon Smock",
+        "Libin Liang",
+        "Max Sokolov",
+        "Amrit Ramesh",
+        "Valerie Faucon-Morin",
+        "Tayyibah Khanam",
+        "Maury Courtland"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T17:43:44+00:00",
+      "link": "https://arxiv.org/pdf/2606.09788v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:feed-forward-sparse-view-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "llm_tldr_en": "Large-scale document processing requires contextually aware table extraction (TE) that is both accurate and efficient. Yet current approaches require billions of parameters, hundreds of autoregressive steps, or costly API inference. Motivated by this, we introduce the Page-Object...",
+      "llm_tldr_cn": "Large-scale document processing requires contextually aware table extraction (TE) that is both accurate and efficient. Yet current approaches require billions of parameters, hundreds of autoregressive steps, or costly API inference. Motivated by this, we introduce the Page-Object...",
+      "llm_tldr": "Large-scale document processing requires contextually aware table extraction (TE) that is both accurate and efficient. Yet current approaches require billions of parameters, hundreds of autoregressive steps, or costly API inference. Motivated by this, we introduce the Page-Object...",
+      "llm_tags": [
+        "query:feed-forward-sparse-view-reconstruction"
+      ],
+      "matched_query_tag": "query:feed-forward-sparse-view-reconstruction",
+      "matched_query_text": "Methods related to DUSt3R, MASt3R, VGGT, large reconstruction models, transformer-based 3D reconstruction, or fast 3D scene reconstruction from few images.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.09788v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.10019v1",
+      "source": "arxiv",
+      "title": "Generalized-CVO: Fast and Correspondence-Free Local Point Cloud Registration with Second Order Riemannian Optimization",
+      "abstract": "We propose a fast and correspondence-free local point cloud registration method that leverages geometric surface structure and reproducing kernel Hilbert space (RKHS) embeddings. The method represents point clouds as continuous functions with point-wise anisotropic kernels that encode local geometry. This formulation improves alignment along surface normals while relaxing alignment along tangential directions. To solve the resulting registration problem, we propose a second-order on-manifold optimization scheme with approximate Riemannian Hessians, achieving a speedup of up to 10x over the first-order solvers used in prior correspondence-free RKHS-based methods. We demonstrate improved frame-to-frame LiDAR and RGB-D tracking accuracy across diverse indoor and outdoor datasets. On a LiDAR tracking registration task in the driving domain, we achieve a reduction of $>55\\%$ in both translational and rotational drift in challenging feature-sparse environments. On object registration benchmarks, we show improved robustness over ICP-based methods and further gains when refining global initialization, particularly under moderate misalignment.",
+      "authors": [
+        "Ray Zhang",
+        "Marcus Greiff",
+        "Thomas Lew",
+        "John Subosits"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.RO"
+      ],
+      "published": "2026-06-08T18:07:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.10019v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "We propose a fast and correspondence-free local point cloud registration method that leverages geometric surface structure and reproducing kernel Hilbert space (RKHS) embeddings. The method represents point clouds as continuous functions with point-wise anisotropic kernels that e...",
+      "llm_tldr_cn": "We propose a fast and correspondence-free local point cloud registration method that leverages geometric surface structure and reproducing kernel Hilbert space (RKHS) embeddings. The method represents point clouds as continuous functions with point-wise anisotropic kernels that e...",
+      "llm_tldr": "We propose a fast and correspondence-free local point cloud registration method that leverages geometric surface structure and reproducing kernel Hilbert space (RKHS) embeddings. The method represents point clouds as continuous functions with point-wise anisotropic kernels that e...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10019v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.10050v1",
+      "source": "arxiv",
+      "title": "Continuous Neural Reparameterization as a Deep Geometric Prior for Robust Fixed-Chart UV Repair",
+      "abstract": "Traditional UV unwrapping relies on direct optimization of geometric distortion energies and can fail through invalid initialization, local minima, or topological foldovers. We recast fixed-chart UV unwrapping as continuous neural reparameterization: an untrained SIREN maps per-vertex mesh features to UV coordinates, and its weights are optimized for a geometric objective. The practical contribution is a robust chart-solver recipe, combining Laplace--Beltrami spectral inputs, Tutte residual warm-up, a $C^2$ determinant extension, an injectivity barrier, and validity-checked retry/fallback routing, rather than a claim that any single component guarantees validity or that recutting methods should be replaced. NTK--LBO diagnostics show that spectral conditioning changes update geometry, especially at initialization and mid-rank subspaces, but does not by itself predict chart success. On compact pre-cut charts and a 47-chart stratified Thingi10K/xatlas-cut benchmark, the neural solver produces zero flips on all compact charts and 42/47 valid zero-flip stratified solves. BFF and OptCuts comparisons sharpen the scope: recutting can be faster and lower-distortion when allowed, while the neural solver targets supplied-chart validity and validation-first atlas construction. On Amara Spatial generated meshes, the full atlas construction path gives packed-atlas coverage on a 25-asset set and 1000/1000 strict locally valid atlases with zero UV flips in a large-scale Rust atlas run after fallback routing.",
+      "authors": [
+        "Mohammad Sadegh Salehi"
+      ],
+      "primary_category": "cs.GR",
+      "categories": [
+        "cs.GR",
+        "cs.CV"
+      ],
+      "published": "2026-06-08T18:26:03+00:00",
+      "link": "https://arxiv.org/pdf/2606.10050v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Traditional UV unwrapping relies on direct optimization of geometric distortion energies and can fail through invalid initialization, local minima, or topological foldovers. We recast fixed-chart UV unwrapping as continuous neural reparameterization: an untrained SIREN maps per-v...",
+      "llm_tldr_cn": "Traditional UV unwrapping relies on direct optimization of geometric distortion energies and can fail through invalid initialization, local minima, or topological foldovers. We recast fixed-chart UV unwrapping as continuous neural reparameterization: an untrained SIREN maps per-v...",
+      "llm_tldr": "Traditional UV unwrapping relies on direct optimization of geometric distortion energies and can fail through invalid initialization, local minima, or topological foldovers. We recast fixed-chart UV unwrapping as continuous neural reparameterization: an untrained SIREN maps per-v...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10050v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.10142v1",
+      "source": "arxiv",
+      "title": "DB-3DME: From Dataset to Benchmark for Human-aligned Automatic 3D Mesh Evaluation",
+      "abstract": "Recent advances in 3D generation have led to substantial improvements in realism, controllability, and efficiency, yet the evaluation of 3D assets remains underexplored. Existing evaluation paradigms, including human evaluation, learned metrics, and vision-language models (VLMs) as judges, suffer from limitations in cost, scalability, resolution handling, or task-specific alignment. In this work, we focus on 3D mesh evaluation and introduce DB-3DME, the Dataset and Benchmark for 3D Mesh Evaluation. DB-3DME contains 2,619 synthetic 3D meshes paired with human ratings on Geometry and Prompt Adherence. Using this dataset, we systematically benchmark state-of-the-art VLMs and identify visual encoding of 3D representations as a key factor for human-aligned evaluation performance. Motivated by this finding, we fine-tune an open-weight VLM, Qwen-2.5-VL-7B, for 3D mesh evaluation by adapting the visual encoder while freezing the language model. The fine-tuned model substantially outperforms existing pre-trained VLMs across multiple evaluation dimensions, establishing a new benchmark for automatic 3D mesh evaluation. We publicly release the benchmark dataset on GitHub and Hugging Face to facilitate future research.",
+      "authors": [
+        "Nanshan Jia",
+        "Zhenyu Zhao",
+        "Sui Huang",
+        "Jingshen Wang",
+        "Zeyu Zheng"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T20:17:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.10142v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:feed-forward-sparse-view-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:feed-forward-sparse-view-reconstruction 命中",
+      "llm_tldr_en": "Recent advances in 3D generation have led to substantial improvements in realism, controllability, and efficiency, yet the evaluation of 3D assets remains underexplored. Existing evaluation paradigms, including human evaluation, learned metrics, and vision-language models (VLMs) ...",
+      "llm_tldr_cn": "Recent advances in 3D generation have led to substantial improvements in realism, controllability, and efficiency, yet the evaluation of 3D assets remains underexplored. Existing evaluation paradigms, including human evaluation, learned metrics, and vision-language models (VLMs) ...",
+      "llm_tldr": "Recent advances in 3D generation have led to substantial improvements in realism, controllability, and efficiency, yet the evaluation of 3D assets remains underexplored. Existing evaluation paradigms, including human evaluation, learned metrics, and vision-language models (VLMs) ...",
+      "llm_tags": [
+        "query:feed-forward-sparse-view-reconstruction"
+      ],
+      "matched_query_tag": "query:feed-forward-sparse-view-reconstruction",
+      "matched_query_text": "Methods related to DUSt3R, MASt3R, VGGT, large reconstruction models, transformer-based 3D reconstruction, or fast 3D scene reconstruction from few images.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10142v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.10275v1",
+      "source": "arxiv",
+      "title": "FoA-SR: Faithful or Aesthetic? Profile-Aware Preference Optimization for Real-World Image Super-Resolution",
+      "abstract": "Real-world image super-resolution (SR) is often designed with a single restoration objective, despite the current capacity of generative models to produce multiple high-quality reconstructions for the same input. In this paper, we argue that the best restoration strategy is subject to the specific restoration profile: a Faithful restoration prioritizes reference consistency, structure preservation, and hallucination suppression, whereas an Aesthetic restoration prioritizes visually pleasing and natural-looking details. We propose FoA-SR, a novel preference optimization approach to real-world SR based on profiles. To achieve this goal, FoA-SR starts with our supervised FLUX.2-based SR adapter (Flux2SR) trained with LR latent conditioning, flow matching, and image-space reconstruction losses for paired LR-to-HR image super-resolution. Following the development of the shared supervised super-resolution adapter, FoA-SR generates a shared stochastic candidate pool for each input image and ranks the same candidates using profile-specific Faithful and Aesthetic rewards to mine winner-loser pairs. These pairs are used to fine-tune separate LoRA adapters while keeping the base model frozen. Experiments on RealSR and DIV2K show that FoA-SR can steer the same SR adapter towards distinct restoration objectives: a Faithful adapter improves reference-consistent metrics while an Aesthetic adapter boosts metrics that measure perceptual quality without reference. Our candidate-pool analysis shows that Faithful and Aesthetic rewards frequently select different winners, and a Hybrid-LoRA ablation shows that collapsing both profiles into one reward yields an implicit compromise rather than explicit profile control.",
+      "authors": [
+        "Amjad Mahdi Alqarni",
+        "Peizhong Ju"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-09T00:44:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.10275v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Real-world image super-resolution (SR) is often designed with a single restoration objective, despite the current capacity of generative models to produce multiple high-quality reconstructions for the same input. In this paper, we argue that the best restoration strategy is subje...",
+      "llm_tldr_cn": "Real-world image super-resolution (SR) is often designed with a single restoration objective, despite the current capacity of generative models to produce multiple high-quality reconstructions for the same input. In this paper, we argue that the best restoration strategy is subje...",
+      "llm_tldr": "Real-world image super-resolution (SR) is often designed with a single restoration objective, despite the current capacity of generative models to produce multiple high-quality reconstructions for the same input. In this paper, we argue that the best restoration strategy is subje...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10275v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.10364v1",
+      "source": "arxiv",
+      "title": "Benchmarking stereo reconstruction for 3D printable Martian terrain models",
+      "abstract": "Reconstructing printable 3D models from Mars rover imagery is challenging because Martian terrain is low-texture, irregular, and partially observed. We evaluate a pipeline that estimates stereo depth from NASA Curiosity images, completes geometry, and exports watertight OBJ meshes. On Middlebury, RAFT-Stereo outperforms semi-global block matching (SGBM), reducing disparity MAE from 3.22px to 0.73px and increasing valid prediction coverage from 76.3% to 100.0%. On Curiosity imagery, however, RAFT's denser disparities show weaker edge alignment and higher photometric reprojection error, suggesting that benchmark accuracy does not directly transfer to Martian terrain reconstruction. Geometry completion demonstrates a tradeoff between local fidelity and global connectivity. We find that alpha shapes preserve accurate but fragmented structure, Poisson reconstruction produces more coherent meshes but adds unsupported surfaces, and a deterministic diffusion-fill baseline is intermediate but sensitive to stereo quality. Overall, standard stereo and completion methods can produce printable approximations of Martian terrain, but reliable reconstruction requires stronger domain-specific validation.",
+      "authors": [
+        "Josephine Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-09T03:24:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.10364v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Reconstructing printable 3D models from Mars rover imagery is challenging because Martian terrain is low-texture, irregular, and partially observed. We evaluate a pipeline that estimates stereo depth from NASA Curiosity images, completes geometry, and exports watertight OBJ meshe...",
+      "llm_tldr_cn": "Reconstructing printable 3D models from Mars rover imagery is challenging because Martian terrain is low-texture, irregular, and partially observed. We evaluate a pipeline that estimates stereo depth from NASA Curiosity images, completes geometry, and exports watertight OBJ meshe...",
+      "llm_tldr": "Reconstructing printable 3D models from Mars rover imagery is challenging because Martian terrain is low-texture, irregular, and partially observed. We evaluate a pipeline that estimates stereo depth from NASA Curiosity images, completes geometry, and exports watertight OBJ meshe...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10364v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.10442v1",
+      "source": "arxiv",
+      "title": "Information-Preserving Continuous Occupancy Mapping with Variance-Weighted Submap Joining",
+      "abstract": "Large-scale SLAM remains challenging due to accumulated trajectory drift and the increasing computational cost of maintaining global consistency. Submap joining alleviates these issues by constructing locally consistent submaps and subsequently fusing them into a global map. However, existing occupancy-based submap joining methods operate on discrete grids, resulting in non-smooth gradients during optimization and neglecting the uncertainty associated with occupancy estimates. We propose the first continuous probabilistic submap joining framework that jointly optimizes submap poses and a global occupancy field in the latent log-odds space. The framework employs an information-preserving sparse Bayesian formulation that compresses raw occupancy observations into sufficient-statistic log-odds tuples while retaining the posterior information of the original observations. This yields closed-form predictive mean and variance estimates for occupancy mapping, which directly enable a submap joining formulation with analytical Jacobians, leading to more accurate submap joining and yielding a closed-form optimal global map upon pose convergence. Experiments on both simulated and large-scale real-world datasets demonstrate that the proposed method achieves higher pose accuracy and improved global consistency than state-of-the-art grid-based submap joining approaches, while producing more compact map representations and better-calibrated uncertainty estimates than existing continuous occupancy mapping methods.",
+      "authors": [
+        "Zhuhua Bai",
+        "Yingyu Wang",
+        "Liang Zhao",
+        "Shoudong Huang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-09T05:38:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.10442v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Large-scale SLAM remains challenging due to accumulated trajectory drift and the increasing computational cost of maintaining global consistency. Submap joining alleviates these issues by constructing locally consistent submaps and subsequently fusing them into a global map. Howe...",
+      "llm_tldr_cn": "Large-scale SLAM remains challenging due to accumulated trajectory drift and the increasing computational cost of maintaining global consistency. Submap joining alleviates these issues by constructing locally consistent submaps and subsequently fusing them into a global map. Howe...",
+      "llm_tldr": "Large-scale SLAM remains challenging due to accumulated trajectory drift and the increasing computational cost of maintaining global consistency. Submap joining alleviates these issues by constructing locally consistent submaps and subsequently fusing them into a global map. Howe...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10442v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.10541v1",
+      "source": "arxiv",
+      "title": "GRAR: Glass-induced Reflection Artifact Removal in LiDAR Point Clouds",
+      "abstract": "Terrestrial Laser Scanning (TLS) point clouds captured in urban environments frequently suffer from glass-induced reflection artifacts, severely degrading downstream applications. Existing reflection artifact removal methods generally rely on ideal reflection symmetry assumptions, yet their performance is limited by inaccurate glass estimation and insufficient geometric representations. To address these issues, we propose a novel unified framework aimed at robust reflection artifact removal: In the first stage, we leverage a multi-modal vision foundation model to produce initial glass masks, which are then refined using geometric cues to achieve high-precision glass regions, followed by glass completion to recover missing regions caused by no-return measurements on transparent surfaces; In the second stage, we propose a physics-driven descriptor, termed Reflection-aware Local-Global Geometric Similarity (RE-LGGS), which is grounded in actual laser reflection geometry and jointly encodes multi-scale geometric structures and orientation consistency using PCA-based local shape representations, thereby significantly improving robustness against imperfect observations. Extensive experiments on multiple public TLS datasets demonstrate that our framework consistently outperforms state-of-the-art methods in reflection artifacts removal.",
+      "authors": [
+        "Wanpeng Shao",
+        "Zeyi Guo",
+        "Bo Zhang",
+        "Yifei Xue",
+        "Tie Ji",
+        "Yizhen Lao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-09T08:09:33+00:00",
+      "link": "https://arxiv.org/pdf/2606.10541v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Terrestrial Laser Scanning (TLS) point clouds captured in urban environments frequently suffer from glass-induced reflection artifacts, severely degrading downstream applications. Existing reflection artifact removal methods generally rely on ideal reflection symmetry assumptions...",
+      "llm_tldr_cn": "Terrestrial Laser Scanning (TLS) point clouds captured in urban environments frequently suffer from glass-induced reflection artifacts, severely degrading downstream applications. Existing reflection artifact removal methods generally rely on ideal reflection symmetry assumptions...",
+      "llm_tldr": "Terrestrial Laser Scanning (TLS) point clouds captured in urban environments frequently suffer from glass-induced reflection artifacts, severely degrading downstream applications. Existing reflection artifact removal methods generally rely on ideal reflection symmetry assumptions...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Recent papers about 3D Gaussian Splatting for panoramic reconstruction, 360-degree scene reconstruction, omnidirectional images, fisheye cameras, or large field-of-view novel view synthesis.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10541v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.10550v1",
+      "source": "arxiv",
+      "title": "PrismAvatar: Pseudo-Multiview Reconstruction and Subpixel Prism Rendering for Real-Time Stereoscopic Communication",
+      "abstract": "Real-time stereoscopic video communication has long been a goal of immersive telepresence, yet practical systems still require specialized capture rigs or reduce remote users to a single portrait view. We present PrismAvatar, a Gaussian head-avatar system that connects monocular avatar capture with subpixel-encoded glasses-free lenticular display for real-time autostereoscopic communication. From a monocular portrait video, PrismAvatar reconstructs a controllable head avatar and optimizes it for the lateral viewing zones induced by the display. The method uses natural head turns as pseudo-multiview (PMV) supervision to constrain regions that are otherwise weakly observed in monocular training, including hair, ears, jaw contours, and neck boundaries. Reliable side frames are yaw-binned, aligned to virtual cameras, and supervised within a strict head-and-hair domain; contour-aware losses and staged regularization further suppress ghosting, alpha leakage, and depth instability while preserving lateral detail. At runtime, PrismAvatar renders 32 virtual views and encodes them into a 4K lenticular raster with calibrated subpixel-routing masks. The live-tracker prototype sustains 10.65 FPS, and a subject-specific distilled driver raises the same display pipeline to 38.49 FPS.",
+      "authors": [
+        "Chufeng Fang",
+        "Dongdong Teng",
+        "Lilin Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.GR"
+      ],
+      "published": "2026-06-09T08:17:51+00:00",
+      "link": "https://arxiv.org/pdf/2606.10550v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "Real-time stereoscopic video communication has long been a goal of immersive telepresence, yet practical systems still require specialized capture rigs or reduce remote users to a single portrait view. We present PrismAvatar, a Gaussian head-avatar system that connects monocular ...",
+      "llm_tldr_cn": "Real-time stereoscopic video communication has long been a goal of immersive telepresence, yet practical systems still require specialized capture rigs or reduce remote users to a single portrait view. We present PrismAvatar, a Gaussian head-avatar system that connects monocular ...",
+      "llm_tldr": "Real-time stereoscopic video communication has long been a goal of immersive telepresence, yet practical systems still require specialized capture rigs or reduce remote users to a single portrait view. We present PrismAvatar, a Gaussian head-avatar system that connects monocular ...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.10550v1",
+      "quick_tier": "8plus"
+    }
+  ]
+}

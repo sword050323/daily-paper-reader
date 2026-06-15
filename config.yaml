@@ -1,11 +1,13 @@
 github:
-  owner: ''
+  owner: sword050323
   repo: daily-paper-reader
+
 arxiv_paper_setting:
   mode: standard
   days_window: 9
   docs_dir: docs
   prefer_supabase_read: true
+
 supabase:
   enabled: true
   url: https://lyucdwgefyfbmaiopjbk.supabase.co
@@ -20,8 +22,118 @@ supabase:
   sync_table: arxiv_sync_status
   sync_success_value: success
   schema: public
+
 subscriptions:
   schema_migration:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+
+  intent_profiles:
+    - tag: 3dgs-panoramic-reconstruction
+      description: "3D Gaussian Splatting based panoramic reconstruction, 360-degree reconstruction, and large field-of-view scene representation"
+      enabled: true
+      keywords:
+        - 3D Gaussian Splatting
+        - Gaussian Splatting
+        - panoramic reconstruction
+        - 360-degree reconstruction
+        - omnidirectional reconstruction
+        - large field-of-view reconstruction
+        - equirectangular image
+        - fisheye camera
+        - panorama novel view synthesis
+      intent_queries:
+        - "Recent papers about 3D Gaussian Splatting for panoramic reconstruction, 360-degree scene reconstruction, omnidirectional images, fisheye cameras, or large field-of-view novel view synthesis."
+        - "Methods that adapt Gaussian Splatting, radiance fields, or neural rendering to panorama, wide-baseline, wide-FOV, or unbounded scene reconstruction."
+
+    - tag: feed-forward-sparse-view-reconstruction
+      description: "Feed-forward 3D reconstruction, sparse-view reconstruction, and few-shot novel view synthesis"
+      enabled: true
+      keywords:
+        - feed-forward 3D reconstruction
+        - sparse-view reconstruction
+        - few-shot novel view synthesis
+        - single image 3D reconstruction
+        - multi-view stereo
+        - DUSt3R
+        - MASt3R
+        - VGGT
+        - large reconstruction model
+        - pixel-aligned reconstruction
+      intent_queries:
+        - "Recent papers about feed-forward 3D reconstruction, sparse-view reconstruction, few-shot novel view synthesis, or generalizable reconstruction models."
+        - "Methods related to DUSt3R, MAStR, VGGT, large reconstruction models, transformer-based 3D reconstruction, or fast 3D scene reconstruction from few images."
+
+    - tag: novel-view-synthesis-temporal-motion
+      description: "Novel view synthesis, dynamic scene reconstruction, temporal consistency, and motion modeling"
+      enabled: true
+      keywords:
+        - novel view synthesis
+        - dynamic novel view synthesis
+        - dynamic Gaussian Splatting
+        - 4D Gaussian Splatting
+        - temporal consistency
+        - motion modeling
+        - scene flow
+        - deformable Gaussian
+        - video reconstruction
+        - time-varying scene
+      intent_queries:
+        - "Recent papers about novel view synthesis, dynamic Gaussian Splatting, 4D reconstruction, temporal consistency, motion modeling, scene flow, or deformable scene representation."
+        - "Methods for reconstructing dynamic scenes from videos or sparse views using Gaussian Splatting, neural rendering, radiance fields, or motion-aware representations."
+
+    - tag: geometric-constraints-foundation-models
+      description: "Geometric constraints, camera pose, depth, epipolar geometry, and foundation models for 3D vision"
+      enabled: true
+      keywords:
+        - geometric constraint
+        - epipolar geometry
+        - camera pose estimation
+        - bundle adjustment
+        - depth estimation
+        - multi-view geometry
+        - foundation model
+        - vision foundation model
+        - geometric foundation model
+        - visual correspondence
+        - feature matching
+      intent_queries:
+        - "Recent papers about geometric constraints, camera pose estimation, epipolar geometry, bundle adjustment, depth estimation, correspondence matching, or multi-view geometry for 3D reconstruction."
+        - "Papers that combine foundation models, visual correspondence, monocular depth, semantic priors, or multimodal models with 3D reconstruction and novel view synthesis."
+
+    - tag: multimodal-3d-vision
+      description: "Multimodal 3D vision, language-guided reconstruction, segmentation priors, and semantic scene understanding"
+      enabled: true
+      keywords:
+        - multimodal 3D vision
+        - vision-language model
+        - language-guided 3D reconstruction
+        - open-vocabulary 3D segmentation
+        - semantic Gaussian Splatting
+        - CLIP
+        - DINO
+        - Segment Anything
+        - SAM
+        - 3D scene understanding
+      intent_queries:
+        - "Recent papers about multimodal 3D vision, language-guided 3D reconstruction, open-vocabulary 3D scene understanding, semantic Gaussian Splatting, or foundation-model priors for 3D scenes."
+        - "Methods that use CLIP, DINO, SAM, vision-language models, or segmentation priors for Gaussian Splatting, 3D reconstruction, or neural rendering."
+
+    - tag: related-neural-rendering-3d-vision
+      description: "Related research in neural rendering, SLAM, depth, MVS, point clouds, and 3D scene representation"
+      enabled: true
+      keywords:
+        - neural rendering
+        - radiance field
+        - NeRF
+        - 3D scene representation
+        - SLAM
+        - visual localization
+        - point cloud reconstruction
+        - mesh reconstruction
+        - depth completion
+        - multi-view reconstruction
+      intent_queries:
+        - "Recent related papers about neural rendering, radiance fields, SLAM, visual localization, point cloud reconstruction, mesh reconstruction, depth completion, or multi-view 3D scene representation."
+        - "Papers that may benefit 3DGS-based reconstruction, sparse-view modeling, dynamic scene reconstruction, geometric reasoning, or foundation-model-assisted 3D vision."

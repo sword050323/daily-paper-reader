@@ -63,7 +63,7 @@ subscriptions:
         - pixel-aligned reconstruction
       intent_queries:
         - "Recent papers about feed-forward 3D reconstruction, sparse-view reconstruction, few-shot novel view synthesis, or generalizable reconstruction models."
-        - "Methods related to DUSt3R, MAStR, VGGT, large reconstruction models, transformer-based 3D reconstruction, or fast 3D scene reconstruction from few images."
+        - "Methods related to DUSt3R, MASt3R, VGGT, large reconstruction models, transformer-based 3D reconstruction, or fast 3D scene reconstruction from few images."
 
     - tag: novel-view-synthesis-temporal-motion
       description: "Novel view synthesis, dynamic scene reconstruction, temporal consistency, and motion modeling"

@@ -683,6 +683,102 @@ def main() -> None:
     )
     if trace_ids:
         print_trace_retrieval("RERANK", rerank_path, trace_ids)
+    # run_step(
+    #     "Step 4 - LLM refine",
+    #     [python, os.path.join(SRC_DIR, "4.llm_refine_papers.py")],
+    # )
+    if os.getenv("DPR_NO_LLM", "1").lower() in {"1", "true", "yes", "on"}:
+    print(
+        "[INFO] DPR_NO_LLM=1: skip Step 4 LLM refine and build .llm.json from rerank results.",
+        flush=True,
+    )
+
+    data = load_json_safe(rerank_path)
+    if isinstance(data, dict):
+        papers = data.get("papers") or []
+        paper_by_id = {
+            str(p.get("id") or p.get("paper_id") or "").strip(): p
+            for p in papers
+            if isinstance(p, dict)
+        }
+
+        merged = {}
+        queries = data.get("queries") or []
+
+        for q in queries:
+            if not isinstance(q, dict):
+                continue
+
+            ranked = q.get("ranked") or []
+            query_tag = str(
+                q.get("paper_tag")
+                or q.get("tag")
+                or q.get("query_text")
+                or "rerank"
+            ).strip()
+            query_text = str(q.get("query_text") or q.get("query") or query_tag).strip()
+
+            for item in ranked:
+                if not isinstance(item, dict):
+                    continue
+
+                pid = str(item.get("paper_id") or item.get("id") or "").strip()
+                if not pid:
+                    continue
+
+                score = float(item.get("score") or 0.0)
+                star = int(item.get("star_rating") or 0)
+
+                if star >= 5:
+                    llm_score = 9.5
+                elif star == 4:
+                    llm_score = 8.0
+                elif star == 3:
+                    llm_score = 7.0
+                elif star == 2:
+                    llm_score = 5.0
+                else:
+                    llm_score = max(0.0, min(10.0, score * 10.0))
+
+                old = merged.get(pid)
+                if old is not None and llm_score <= float(old.get("score", 0)):
+                    continue
+
+                paper = paper_by_id.get(pid) or {}
+                title = str(paper.get("title") or "").strip()
+                abstract = str(paper.get("abstract") or "").strip()
+                tldr = abstract[:280] + ("..." if len(abstract) > 280 else "")
+
+                merged[pid] = {
+                    "id": pid,
+                    "paper_id": pid,
+                    "score": llm_score,
+                    "evidence_en": f"retrieved by {query_tag}",
+                    "evidence_cn": f"由检索词条 {query_tag} 命中",
+                    "tldr_en": tldr or title,
+                    "tldr_cn": tldr or title,
+                    "title_zh": title,
+                    "motivation_cn": "",
+                    "method_cn": "",
+                    "result_cn": "",
+                    "conclusion_cn": "",
+                    "matched_query_tag": query_tag,
+                    "matched_query_text": query_text,
+                    "llm_tags": [query_tag],
+                }
+
+        data["llm_ranked"] = sorted(
+            merged.values(),
+            key=lambda x: float(x.get("score", 0)),
+            reverse=True,
+        )
+        data["llm_ranked_at"] = datetime.now(timezone.utc).isoformat()
+
+        save_json(llm_path, data)
+        print(f"[INFO] no-LLM fallback saved: {llm_path}", flush=True)
+    else:
+        print(f"[WARN] no-LLM fallback failed: {rerank_path}", flush=True)
+else:
     run_step(
         "Step 4 - LLM refine",
         [python, os.path.join(SRC_DIR, "4.llm_refine_papers.py")],

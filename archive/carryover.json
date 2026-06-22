@@ -1,35 +1,35 @@
 {
-  "generated_at": "2026-06-21T21:11:14.738180+00:00",
-  "updated_date": "20260621",
+  "generated_at": "2026-06-22T21:45:16.094357+00:00",
+  "updated_date": "20260622",
   "carryover_days": 1,
   "tag_states": {
     "3dgs-panoramic-reconstruction": {
-      "updated_date": "20260621",
+      "updated_date": "20260622",
       "carryover_days": 1,
       "items": []
     },
     "feed-forward-sparse-view-reconstruction": {
-      "updated_date": "20260621",
+      "updated_date": "20260622",
       "carryover_days": 1,
       "items": []
     },
     "novel-view-synthesis-temporal-motion": {
-      "updated_date": "20260621",
+      "updated_date": "20260622",
       "carryover_days": 1,
       "items": []
     },
     "geometric-constraints-foundation-models": {
-      "updated_date": "20260621",
+      "updated_date": "20260622",
       "carryover_days": 1,
       "items": []
     },
     "multimodal-3d-vision": {
-      "updated_date": "20260621",
+      "updated_date": "20260622",
       "carryover_days": 1,
       "items": []
     },
     "related-neural-rendering-3d-vision": {
-      "updated_date": "20260621",
+      "updated_date": "20260622",
       "carryover_days": 1,
       "items": []
     }

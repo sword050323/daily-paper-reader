@@ -1,0 +1,159 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-26T17:01:58.874509+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 6,
+    "daily_top_k": 3,
+    "forced_top_k": true,
+    "deep_divecandidates": 174,
+    "deep_cap": 0,
+    "deep_selected": 0,
+    "quick_candidates": 174,
+    "quick_skim_target": 3,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.12437v1",
+      "source": "arxiv",
+      "title": "3D Gaussian Splatting for Efficient Retrospective Dynamic Scene Novel View Synthesis with a Standardized Benchmark",
+      "abstract": "Retrospective novel view synthesis (NVS) of dynamic scenes is fundamental to applications such as sports. Recent dynamic 3D Gaussian Splatting (3DGS) approaches introduce temporally coupled formulations to enforce motion coherence across time. In this paper, we argue that, in a synchronized multi-view (MV) setting typical of sports, the dynamic scene at each time step is already strongly geometrically constrained. We posit that the availability of calibrated, synchronized viewpoints provides sufficient spatial consistency, and therefore, explicit temporal coupling, or complex multi-body constraints seems unnecessary for retrospective NVS. To this end, we propose an approach tailored for synchronized MV dynamic scene. By initializing the SfM-derived point cloud at the start time and propagating optimized Gaussians over time, we show that efficient retrospective NVS can be achieved without imposing a temporal deformation constraint. Complementing our methodological contribution, we introduce a Dynamic MV dataset framework built on Blender for reproducible NeRF and 3DGS research. The framework generates high-quality, synchronized camera rigs and exports training-ready datasets in standard formats, eliminating inconsistencies in coordinate conventions and data pipelines. Using the framework, we construct a dynamic benchmark suite and evaluate representative NeRF and 3DGS approaches under controlled conditions. Together, we show that, under a synchronized MV setup, efficient retrospective dynamic scene NVS can be achieved using 3DGS. At the same time, the dataset-generation framework enables reproducible and principled benchmarking of dynamic NVS methods.",
+      "authors": [
+        "Yunxiao Zhang",
+        "Suryansh Kumar"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-05-12T17:33:14+00:00",
+      "link": "https://arxiv.org/pdf/2605.12437v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "retrieved by query:novel-view-synthesis-temporal-motion",
+      "llm_evidence_cn": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "llm_evidence": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "canonical_evidence": "由检索词条 query:novel-view-synthesis-temporal-motion 命中",
+      "llm_tldr_en": "Retrospective novel view synthesis (NVS) of dynamic scenes is fundamental to applications such as sports. Recent dynamic 3D Gaussian Splatting (3DGS) approaches introduce temporally coupled formulations to enforce motion coherence across time. In this paper, we argue that, in a s...",
+      "llm_tldr_cn": "Retrospective novel view synthesis (NVS) of dynamic scenes is fundamental to applications such as sports. Recent dynamic 3D Gaussian Splatting (3DGS) approaches introduce temporally coupled formulations to enforce motion coherence across time. In this paper, we argue that, in a s...",
+      "llm_tldr": "Retrospective novel view synthesis (NVS) of dynamic scenes is fundamental to applications such as sports. Recent dynamic 3D Gaussian Splatting (3DGS) approaches introduce temporally coupled formulations to enforce motion coherence across time. In this paper, we argue that, in a s...",
+      "llm_tags": [
+        "query:novel-view-synthesis-temporal-motion"
+      ],
+      "matched_query_tag": "query:novel-view-synthesis-temporal-motion",
+      "matched_query_text": "Recent papers about novel view synthesis, dynamic Gaussian Splatting, 4D reconstruction, temporal consistency, motion modeling, scene flow, or deformable scene representation.",
+      "matched_requirement_id": "",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2605.13600v1",
+      "source": "arxiv",
+      "title": "Sparse Code Uplifting for Efficient 3D Language Gaussian Splatting",
+      "abstract": "3D Language Gaussian Splatting (3DLGS) augments 3D Gaussian Splatting with language-aligned visual features for open-vocabulary 3D scene understanding. A core challenge is efficiently associating high-dimensional vision-language embeddings with millions of 3D Gaussians while preserving efficient feature rendering for text-based querying. Existing methods either store dense features directly on Gaussians, causing high storage costs and slow rendering, or learn compact representations through expensive per-scene optimization with repeated feature rasterization. No existing method simultaneously achieves fast 3D semantic reconstruction, efficient storage, and fast rendering. We propose SCOUP (Sparse COde UPlifting), which addresses all three by decoupling language representation learning from 3D Gaussian optimization. Rather than working directly in 3D, we learn sparse codebook-based representations entirely using features associated with 2D image regions, associating each region with a sparse set of codebook coefficients. We then uplift these coefficients to 3D Gaussians with our weighted sparse aggregation using Gaussian-to-pixel associations, where each Gaussian accumulates coefficients over codebook atoms across views. Top-$K$ filtering then extracts the most dominant multi-view coefficients per Gaussian, enabling efficient storage and fast rendering. Our method achieves up to $400\\times$ training speedup while being $3\\times$ more memory efficient during training compared to the state-of-the-art in rendering speed. Across multiple benchmarks, SCOUP matches or outperforms existing methods in open-vocabulary querying accuracy.",
+      "authors": [
+        "Lovre Antonio Budimir",
+        "Yushi Guan",
+        "Steve Ryhner",
+        "Sven Lončarić",
+        "Nandita Vijaykumar"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-05-13T14:35:31+00:00",
+      "link": "https://arxiv.org/pdf/2605.13600v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "retrieved by query:multimodal-3d-vision",
+      "llm_evidence_cn": "由检索词条 query:multimodal-3d-vision 命中",
+      "llm_evidence": "由检索词条 query:multimodal-3d-vision 命中",
+      "canonical_evidence": "由检索词条 query:multimodal-3d-vision 命中",
+      "llm_tldr_en": "3D Language Gaussian Splatting (3DLGS) augments 3D Gaussian Splatting with language-aligned visual features for open-vocabulary 3D scene understanding. A core challenge is efficiently associating high-dimensional vision-language embeddings with millions of 3D Gaussians while pres...",
+      "llm_tldr_cn": "3D Language Gaussian Splatting (3DLGS) augments 3D Gaussian Splatting with language-aligned visual features for open-vocabulary 3D scene understanding. A core challenge is efficiently associating high-dimensional vision-language embeddings with millions of 3D Gaussians while pres...",
+      "llm_tldr": "3D Language Gaussian Splatting (3DLGS) augments 3D Gaussian Splatting with language-aligned visual features for open-vocabulary 3D scene understanding. A core challenge is efficiently associating high-dimensional vision-language embeddings with millions of 3D Gaussians while pres...",
+      "llm_tags": [
+        "query:multimodal-3d-vision"
+      ],
+      "matched_query_tag": "query:multimodal-3d-vision",
+      "matched_query_text": "Recent papers about multimodal 3D vision, language-guided 3D reconstruction, open-vocabulary 3D scene understanding, semantic Gaussian Splatting, or foundation-model priors for 3D scenes.",
+      "matched_requirement_id": "",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2605.14135v1",
+      "source": "arxiv",
+      "title": "PanoPlane: Plane-Aware Panoramic Completion for Sparse-View Indoor 3D Gaussian Splatting",
+      "abstract": "We present PanoPlane, an approach for high-fidelity sparse-view indoor novel view synthesis that reconstructs closed room geometry via panoramic scene completion. Unlike perspective-based methods that generate training views from limited fields of view, PanoPlane leverages $360^{\\circ}$ panoramic completion to condition the generative process on the full spatial layout. We propose Layout Anchored Attention Steering, a training-free mechanism that steers attention within the diffusion model's internal representation toward scene's detected planar surfaces at inference time. By directing each unobserved region's attention toward geometrically consistent observed content, our method replaces unconstrained hallucination with grounded surface extrapolation. The resulting panoramic completions provide supervision for 3D Gaussian Splatting, enabling accurate novel-view synthesis across unobserved regions from as few as three input views. Experiments on Replica, ScanNet++, and Matterport3D demonstrate state-of-the-art novel view synthesis quality across 3, 6, and 9 input views, achieving up to $+17.8\\%$ improvement in PSNR over the current state-of-the-art baseline without any training or fine-tuning of the diffusion model.",
+      "authors": [
+        "Adil Qureshi",
+        "Dongki Jung",
+        "Jaehoon Choi",
+        "Dinesh Manocha"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-05-13T21:39:01+00:00",
+      "link": "https://arxiv.org/pdf/2605.14135v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "retrieved by query:3dgs-panoramic-reconstruction",
+      "llm_evidence_cn": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "canonical_evidence": "由检索词条 query:3dgs-panoramic-reconstruction 命中",
+      "llm_tldr_en": "We present PanoPlane, an approach for high-fidelity sparse-view indoor novel view synthesis that reconstructs closed room geometry via panoramic scene completion. Unlike perspective-based methods that generate training views from limited fields of view, PanoPlane leverages $360^{...",
+      "llm_tldr_cn": "We present PanoPlane, an approach for high-fidelity sparse-view indoor novel view synthesis that reconstructs closed room geometry via panoramic scene completion. Unlike perspective-based methods that generate training views from limited fields of view, PanoPlane leverages $360^{...",
+      "llm_tldr": "We present PanoPlane, an approach for high-fidelity sparse-view indoor novel view synthesis that reconstructs closed room geometry via panoramic scene completion. Unlike perspective-based methods that generate training views from limited fields of view, PanoPlane leverages $360^{...",
+      "llm_tags": [
+        "query:3dgs-panoramic-reconstruction"
+      ],
+      "matched_query_tag": "query:3dgs-panoramic-reconstruction",
+      "matched_query_text": "Recent papers about 3D Gaussian Splatting for panoramic reconstruction, 360-degree scene reconstruction, omnidirectional images, fisheye cameras, or large field-of-view novel view synthesis.",
+      "matched_requirement_id": "",
+      "selection_source": "fresh_fetch"
+    }
+  ]
+}

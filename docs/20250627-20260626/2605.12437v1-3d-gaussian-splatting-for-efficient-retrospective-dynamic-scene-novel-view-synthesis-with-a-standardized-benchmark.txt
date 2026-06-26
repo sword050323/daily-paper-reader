@@ -1,0 +1,557 @@
+Title: 3D Gaussian Splatting for Efficient Retrospective Dynamic Scene Novel View Synthesis with a Standardized Benchmark
+
+URL Source: https://arxiv.org/pdf/2605.12437v1
+
+Published Time: Wed, 13 May 2026 01:43:24 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# 3D Gaussian Splatting for Efficient Retrospective Dynamic Scene Novel View Synthesis with a Standardized Benchmark 
+
+# Yunxiao Zhang 1,2 Suryansh Kumar 1,2,3,4,∗
+
+# Visual and Spatial AI Lab 1, VCCM Section College of PVFA 2, Department of ECEN 3, Department of CSCE 4,Texas A&M University, College Station, Texas, USA 
+
+# Abstract 
+
+Retrospective novel view synthesis (NVS) of dynamic scenes is fundamental to applications such as sports. Recent dy-namic 3D Gaussian Splatting (3DGS) approaches introduce temporally coupled formulations to enforce motion coher-ence across time. In this paper, we argue that, in a synchro-nized multi-view (MV) setting typical of sports, the dynamic scene at each time step is already strongly geometrically constrained. We posit that the availability of calibrated, synchronized viewpoints provides sufficient spatial consis-tency, and therefore, explicit temporal coupling, or complex multi-body constraints seems unnecessary for retrospective NVS. To this end, we propose an approach tailored for synchronized MV dynamic scene. By initializing the SfM-derived point cloud at the start time and propagating opti-mized Gaussians over time, we show that efficient retrospec-tive NVS can be achieved without imposing a temporal de-formation constraint. Complementing our methodological contribution, we introduce a Dynamic MV dataset frame-work built on Blender for reproducible NeRF and 3DGS research. The framework generates high-quality, synchro-nized camera rigs and exports training-ready datasets in standard formats, eliminating inconsistencies in coordinate conventions and data pipelines. Using the framework, we construct a dynamic benchmark suite and evaluate rep-resentative NeRF and 3DGS approaches under controlled conditions. Together, we show that, under a synchronized MV setup, efficient retrospective dynamic scene NVS can be achieved using 3DGS. At the same time, the dataset-generation framework enables reproducible and principled benchmarking of dynamic NVS methods. 
+
+# 1. Introduction 
+
+Retrospective novel view synthesis of dynamic scenes has become a central demand for modern visual media applica-
+
+> *Corresponding Author: Suryansh Kumar
+
+tions, including sports replay, performance analysis, immer-sive broadcasting, and virtual cinematography [56]. In such scenarios, a dynamic event must not only be rendered from arbitrary viewpoints but also be revisited at any past mo-ment with high quality image synthesis. This requires scene representations that are both temporally structured and scal-able in compute time and memory footprint. Recent advances in 3D scene representation, most no-tably Neural Radiance Fields (NeRF) [37] and 3D Gaus-sian Splatting (3DGS) [26], have substantially improved static and dynamic view synthesis. In particular, 3DGS has emerged as a compelling alternative to implicit radi-ance fields due to its real-time rendering capabilities and explicit geometric structure. Extensions such as 4DGS [51] and space-time Gaussian [32] variants have further incorpo-rated temporal modeling to support dynamic scenes. How-ever, two practical challenges remain underexplored. 
+
+(I) The role of camera-object temporal motion coupling in dynamic scene modeling. It deserves closer examination in synchronized multi-view settings. In a general sports and visual-performance applications, cameras are mounted on a fixed platform and temporally synchronized, providing strong geometric constraints at every time step. Under such acquisition regimes, the scene at any given time t is already well-posed under principle of multi-view rigidity in projec-tive geometry [19]. This raises an important question: do we necessarily require complex temporally coupled defor-mation models to maintain coherence across frames, or can a carefully designed warm-start 3DGS pipeline suffice? 
+
+(II) Dynamic novel view synthesis methods are often eval-uated under inconsistent dataset conventions. Camera co-ordinate systems, temporal synchronization, training splits, and export formats frequently vary across implementa-tions, complicating reproducibility and hindering quick and fair comparison between NeRF-based and 3DGS-based pipelines. As prior work shows, significant effort is often spent reconciling dataset formats and coordinate conven-tions before meaningful evaluation can even begin. 1          
+
+> arXiv:2605.12437v1 [cs.CV] 12 May 2026 (I) (II)
+> a) Multiview Rigidity b) Dynamic Scene NVS c) Blender API d) Point cloud from API Figure 1. Contributions :(I) a) The multi-body rigidity constraint holds in a dynamic scene under synchronized multi-view camera setup for each time instance t, b) shows an example NVS results. (II) Proposed Blender API for generating multi-view dynamic scene dataset.
+
+In this work, we revisit dynamic scene modeling in a synchronized multi-view setup from the geometric perspec-tive. We propose a warm-start 3DGS framework tailored for synchronized multi-view sequences. At the start, we initial-ize our approach using structure-from-motion (SfM) point cloud [43], and subsequent frames are optimized via warm-start chaining, leveraging the fact that dynamic motion in sports is typically locally smooth between adjacent frames. Rather than introducing additional canonical-space defor-mations or temporal latent variables as done in [36, 51], we show that, under well-calibrated, synchronized capture, geometry alone provides sufficient constraints for stable, memory efficient, and high-fidelity retrospective rendering. Complementing the above methodological contribution, we introduce a Standardized Dynamic Multi-View Dataset Framework built on the popular open-source Blender [8]. The framework automates the generation of parameter-ized synchronized camera rigs, enforces consistent coor-dinate conventions, and exports training-ready data com-patible with both NeRF and 3DGS pipelines. It supports multi-frame dynamic sequences, camera-trajectory genera-tion, and reproducible dataset splits. By eliminating dataset fragmentation and manual conversion steps, this framework substantially reduces experimental overhead and establishes a principled foundation for benchmarking dynamic neu-ral rendering methods. Using this pipeline, we construct a dynamic benchmark suite targeting sports and visual-performance scenarios and systematically evaluate repre-sentative dynamic NeRF and 3DGS approaches under uni-fied conditions. Our analysis highlights practical trade-offs between reconstruction fidelity, memory footprint, initial-ization sensitivity, and training scalability. In summary, this paper makes two strong contributions :• A geometrically grounded 3DGS formulation for efficient retrospective dynamic scene novel view synthesis (NVS) under synchronized multi-view capture. • A standardized dynamic multi-view dataset and bench-marking framework for reproducible NeRF and 3DGS re-search, reducing experimental friction, manual effort and time while enabling principled comparative evaluation. Together, these contributions advance the methodological and experimental foundations of dynamic neural rendering, positioning 3DGS as a practical, reproducible solution for retrospective dynamic scene visualization. Figure 1 provide the qualitative exposition to our contributions. Code, API, and Datasets can be accessed from their respective links. 
+
+# 2. Related Work 
+
+NVS has long been a central problem in computer graphics [10, 44]. Classical approaches laid the foundation for view interpolation and light-field rendering, while modern neural representations have substantially improved reconstruction quality and scalability. For comprehensive surveys, we refer readers to [14, 52, 53]. In this work, we focus on recent de-velopments to dynamic scene NVS using 3DGS techniques. 
+
+(i) Neural Scene Representations. Early approaches pa-rameterized scene content through volumes [34], texture maps [13, 48], or neural point clouds [1]. Not long ago, NeRF [37] approach to NVS transformed multi-view scene reconstruction by learning continuous volumetric scene rep-resentations from a set of well-posed image observations. NeRF marked a milestone by implicitly modeling scenes using differentiable volume rendering without explicit ge-ometry, yielding a compact neural scene representation. Subsequent work focused on improving NeRF’s com-putational efficiency and expressiveness. Techniques such as Instant-NGP [38] used multi-resolution hash encod-ings for fast convergence, while methods such as TensoRF [12] achieved compact representations via decomposition. Other efforts in this direction improved sampling strategies [3, 39], incorporated light-field representations or light in-formation [2, 15, 24, 25, 31, 46, 49], and explored multi-scale modeling [5, 6, 20–22]. Collectively, these works established implicit neural representations as a powerful framework for both static [18] and dynamic NVS [56]. 
+
+(ii) 3D Gaussian Splatting. Lately, 3D Gaussian Splatting (3DGS) [26] has emerged as a highly efficient alternative 2to purely implicit models such as NeRF. By representing scenes as anisotropic 3D Gaussians parameterized by posi-tion, covariance, opacity, and view-dependent color, 3DGS enables real-time rendering via differentiable rasterization. Its explicit geometric structure offers favorable convergence properties and high-fidelity image-synthesis quality. 
+
+(iii) Dynamic Scene Novel View Synthesis. Extending static scene representations for NVS to dynamic scenes is quite natural and has recently attracted significant interest. Early approaches leveraged multi-sphere imagery [9], lay-ered meshes [4], and space-time encoding [7]. Neural Vol-umes [35] and subsequent works modeled dynamic geome-try through encoder-decoder architectures. Meanwhile, NeRF-driven dynamic scenes approaches incorporate temporal conditioning [29], scene-flow [30], canonical deformation fields [40, 41], and factorized space-time representations [11, 16, 45]. These approaches use the well-known temporal smoothness and shared represen-tations across frames. Likewise, the 3DGS extension to the dynamic scene has further expanded its applicability. Pop-ular methods to this end include 4DGS [51], Dynamic 3D Gaussians [36], and space-time Gaussian [33, 54, 55]. More recent work includes MCMC-GS [27] that improves robust-ness with imperfect 3D point initialization. Compression methods such as QUEEN [17] address memory efficiency for dynamic Gaussian representations. While these recent developments demonstrate 3DGS’s maturity and flexibility as a practical NVS framework, they are effective mostly for smoothly varying camera and shape motion. On the contrary, this paper considers a synchronized multi-view camera setup. Under such a setup, unlike com-plex temporal coupling of dynamic subject(s), we propose a warm-start 3DGS strategy that leverages geometric conti-nuity while maintaining per-frame optimization stability. 
+
+(iv) Reproducible Dynamic Scene Benchmarking. Apractical challenge in dynamic scene rendering studies is the inconsistent conventions for datasets. Differences in co-ordinate systems, camera intrinsics, temporal synchroniza-tion, and export formats often complicate prompt and just comparison between NeRF-based and 3DGS-based meth-ods. To this end, NeRF studio [47] provides an excellent platform, yet it is limited to rigid scenes. Datasets such as CMU Panoptic Studio [23] do provide high-quality multi-view captures, yet standardized pipelines for synthetic dy-namic scene generation and benchmarking remain limited. To address these gaps, we introduce a standardized Dy-namic Multi-View Dataset Framework built on the popular Blender [8]. The proposed API enforces consistent cam-era parameterization, synchronized temporal sampling, and export compatibility for both NeRF and 3DGS pipelines. By integrating scene design and training-ready data gener-ation into a unified workflow, our API enables reproducible benchmarking of dynamic scene rendering methods. 
+
+# 3. Method 
+
+Unlike recent dynamic 3DGS methods [36, 51] that enforce temporal coherence via temporal coupling (e.g., deforma-tion fields or canonical templates), we argue that in synchro-nized multi-view settings typical of sports, the scene at each time step is already strongly constrained by calibration and multi-view coverage. Consequently, memory efficient ret-rospective NVS can be achieved without imposing explicit temporal deformation constraints, by leveraging warm-start optimization in 3DGS pipeline across time. 
+
+Problem Setup. We assume a synchronized multi-view capture setting with N calibrated and time-synchronized cameras. At each discrete time instant t ∈ { 1, . . . , T }, the capture provides a set of RGB images 
+
+It = {I(i) 
+
+> t
+
+∈ RH×W ×3}Ni=1 , (1) and known camera parameters πi = ( Ki, R i, ti), where 
+
+Ki is the intrinsic matrix and (Ri, ti) map world coor-dinates to camera coordinates. The problem we aim to solve is given a query time t and a novel camera viewpoint 
+
+π⋆ = ( K⋆, R ⋆, t⋆), we aim to synthesize ˆI⋆t correspond-ing to the dynamic scene state at time t from viewpoint π⋆,while enabling random access in time. 
+
+(i) Time-Indexed Fixed-Size 3D Gaussian Representa-tion. We represent the scene at each time t as a fixed-size set of K anisotropic 3D Gaussians: 
+
+Gt = {gt,k }Kk=1 . (2) Each Gaussian gt,k is parameterized by its mean μt,k ∈ R3,covariance Σt,k ∈ R3×3, opacity αt,k ∈ (0 , 1) , and view-dependent appearance represented by spherical harmonics (SH) coefficients bt,k . We factorize the covariance as 
+
+Σt,k = R(qt,k ) diag( s2
+
+> t,k
+
+) R(qt,k )⊤, (3) where qt,k is a unit quaternion and st,k ∈ R3+ are per-axis scales. We efficiently store the full dynamic event in the set 
+
+A = {G 1, . . . , GT }, (4) enabling retrospective access by loading Gt for any t. Dif-ferently from standard 3DGS training [26], we disable den-sification so that |G t| = K for all t to yields predictable memory footprint, archive size (low-memory footprint), and rendering throughput over long sequences. 
+
+(ii) Differentiable Rasterization via Gaussian Splatting. 
+
+Given a camera i, we transform Gaussian centers to camera coordinates: 
+
+˜μ(i) 
+
+> t,k
+
+= Riμt,k + ti. (5) Let Π( ·) denote perspective projection. The 2D mean on the image plane is 
+
+u(i) 
+
+> t,k
+
+= Π 
+
+
+
+Ki ˜μ(i)
+
+> t,k
+
+
+
+∈ R2. (6) 3To obtain a screen-space elliptical footprint, we compute the Jacobian J of the projection at ˜μ(i) 
+
+> t,k
+
+and form the 2D covariance approximation 
+
+Σ(i) 
+
+> t,k, 2D
+
+= J  RiΣt,k RTi
+
+ JT . (7) The Gaussian kernel at pixel p ∈ R2 is 
+
+G(i)
+
+> t,k
+
+(p) = exp 
+
+
+
+− 12 (p − u(i)
+
+> t,k
+
+)T (Σ (i) 
+
+> t,k, 2D
+
+)−1(p − u(i)
+
+> t,k
+
+)
+
+
+
+,
+
+(8) and a(i)
+
+> t,k
+
+(p) = αt,k G(i)
+
+> t,k
+
+(p) as its per-pixel alpha contribu-tion. By letting d(i) 
+
+> t,k
+
+be the normalized viewing direction from the camera center to μt,k and using the SH basis func-tions {Ym(·)}, the view-dependent color is implemented as: 
+
+c(i) 
+
+> t,k
+
+= X
+
+> m
+
+bt,k,m Ym(d(i)
+
+> t,k
+
+) ∈ R3. (9) For alpha compositing the Gaussians are depth-sorted and composited front-to-back: 
+
+ˆI(i) 
+
+> t
+
+(p) = 
+
+> K
+
+X
+
+> k=1
+
+T (i)
+
+> t,k −1
+
+(p) a(i)
+
+> t,k
+
+(p) c(i)
+
+> t,k
+
+, (10) 
+
+T (i) 
+
+> t,k
+
+(p) = 
+
+> k
+
+Y
+
+> j=1
+
+
+
+1 − a(i) 
+
+> t,j
+
+(p)
+
+
+
+. (11) This formulation for rasterization is differentiable with re-spect to Gaussian parameters, enabling gradient-based opti-mization from images. 
+
+(iii) Point-cloud initialization. We use structure from mo-tion (SfM) derived point cloud only at the start time t0 (typ-ically t0 = 1 ). Given {I(i) 
+
+> t0
+
+}Ni=1 and the calibrated camera setup, we compute a point set 
+
+Pt0 = {pk ∈ R3}Kk=1 , (12) by selecting/sampling K points from the reconstructed cloud (to match the fixed Gaussian budget). We initialize: 
+
+μt0,k ← pk, st0,k ← s01, qt0,k ← q0, αt0,k ← α0.
+
+(13) We initialize appearance coefficients bt0,k by projecting pk
+
+into views where it is visible and aggregating observed col-ors (e.g., via median). The SH average value of the lighting function over a sphere is set to the aggregated RGB value, and higher-order coefficients are initialized to zero. 
+
+(iii) Per-Time-Step Optimization Without Explicit Tem-poral Deformation. For each time t, we optimize the Gaus-sian parameters 
+
+Θt = {μt,k , Σt,k , α t,k , bt,k }Kk=1 (14) Per time SfM  Warm -start       
+
+> 3DGS for Multiview dynamic scene
+> without temporal constraint
+
+Figure 2. For complex highly dynamic scene using constraint pro-posed in 4DGS [51] often break down. On the contrary initializing 3DGS with SfM point cloud for each time instance and envoking rigidity constraint will make the entire pipeline slow. We propose Warm-start ( Right ) training across time, where each frame start from a neighboring frame converged parameter. 
+
+by minimizing a multi-view reconstruction objective: 
+
+Lt(Θ t) = 
+
+> N
+
+X
+
+> i=1
+
+Limg 
+
+ ˆI(i) 
+
+> t
+
+(Θ t), I (i)
+
+> t
+
+
+
++ λreg R(Θ t). (15) We instantiate Limg using robust photometric losses (e.g., 
+
+ℓ1 / Charbonnier) optionally combined with a structural term such as SSIM. The regularizer R is lightweight and aims to avoid degenerate solutions, e.g., 
+
+R(Θ t) = 
+
+> K
+
+X
+
+> k=1
+
+ ∥st,k ∥22 + α2 
+
+> t,k
+
++ ∥bt,k ∥22
+
+ , (16) together with clamping st,k to a valid interval. Impor-tantly, we do not introduce any explicit temporal deforma-tion model or canonical-time constraint into Eq. (15). In synchronized multi-view capture, spatial consistency is en-forced per time by calibration and multi-view supervision. 
+
+(iv) Warm-Start (Warm-Chain) Training Across Time. 
+
+Training an independent 3DGS model from scratch for each time t is costly and introduces unnecessary variabil-ity. We therefore adopt warm-chain initialization , where each frame starts from a neighboring frame’s converged pa-rameters. Let Θ⋆t denote the optimized parameters at time 
+
+t. For a forward warm chain, we initialize 
+
+Θ(0)  
+
+> t
+
+← Θ⋆t−1 for t = t0 + 1 , . . . , T, (17) and optimize Eq. (15) for a fixed number of steps. Equiv-alently, we can process frames in reverse order (backward warm chain): 
+
+Θ(0)  
+
+> t
+
+← Θ⋆t+1 for t = T − 1, . . . , t 0. (18) In both cases, warm start is used strictly for initialization and does not impose an explicit temporal constraint. Note. we disable densification/splitting such that the number of Gaussians remains fixed for efficient archival (low-memory footprint) of the event, i.e., 
+
+|G t| = K ∀ t. (19) 4Algorithm 1 Efficient Retrospective Dynamic 3DGS 
+
+Require: Synchronized images {I t}Tt=1 , camera calibra-tions {πi}Ni=1 , Gaussian budget K 
+
+> 1:
+
+Choose start time t0 (typically t0 = 1 ) 
+
+> 2:
+
+SfM init at t0: compute point cloud Pt0 and sample K
+
+points  
+
+> 3:
+
+Initialize Θ(0)  
+
+> t0
+
+from Pt0 ; optimize to obtain Θ⋆t0 
+
+> 4:
+
+for t = t0 + 1 to T do ▷ forward warm chain (or reverse the loop)  
+
+> 5:
+
+Warm start: Θ(0)  
+
+> t
+
+← Θ⋆t−1 ▷ no densification; K
+
+fixed  
+
+> 6:
+
+Optimize Eq. (15) to obtain Θ⋆t 
+
+> 7:
+
+Archive Θ⋆t 
+
+> 8:
+
+end for  
+
+> 9:
+
+Render: for any query (t, π ⋆), load Θ⋆t and render ˆI⋆t
+
+This design ensures stable compute cost per frame and con-stant archive size, which is desirable for long sports events. Fig. 2 show a visualization to our Warm-start strategy. 
+
+(v) Retrospective Novel-View Synthesis and Archival. 
+
+After optimization, we archive Θ⋆t (or equivalently Gt) for each t, forming A. Retrospective NVS is performed by loading Θ⋆t for a desired time and rendering from an arbi-trary virtual camera π⋆ using the splatting as detailed above. This supports random access in time and viewpoint. Algo-rithm 1 provide the pseudo-code of our implementation. Our proposed warm-start, densification-free formula-tion for dynamic scene NVS yields: 1) stable memory and archive size (fixed K per frame), 2) stable rendering throughput (constant Gaussian budget), and 3) efficient per-frame training (warm initialization reduces optimization ef-fort), while maintaining rendering quality at an acceptable level under strong synchronized multi-view constraints. 
+
+# 4. Blender API for Dynamic NVS 
+
+We introduce a Blender-based dataset generation API that operationalizes the paper’s second contribution. It is a reproducible, format-consistent pipeline for constructing synchronized multi-view, multi-frame benchmarks. The API provides parameterized rig synthesis for common cap-ture geometries, including hemisphere, full sphere, el-lipse ring, and a stadium sports layout (ring + tiled cam-eras with optional goal-line viewpoints). Furthermore, it can export temporally aligned image sequences together with calibrated camera metadata (see Fig.3). To elim-inate the frequent ambiguity in coordinate conventions across NeRF and 3DGS codebases, Blender is used strictly for authoring, while export/import is normalized to an OpenCV/COLMAP-style world-to-camera convention via explicit axis-conversion matrices. The intrinsics follow a top-left image-origin convention to match standard pho-togrammetry tool-chains. The developed exporter supports multiple downstream pipelines, including Instant-NGP [38], NeRF Synthetic [37], TACV [57], and COLMAP [43] poses-only. For 3DGS workflows that depend on geometry or depth, we additionally provide three depth and point-cloud modes: 
+
+(1) COLMAP + surface , which samples a sparse point cloud from the visible mesh surface and exports it along-side COLMAP poses, (2) COLMAP + depth , which back-projects rendered per-view depth maps into 3D and fuses them into a point cloud with COLMAP poses, and (3) depth-only , which exports per-camera depth maps (e.g., 
+
+.npy and .pt ) without fusion. Finally, to ensure protocol-level reproducibility, train/validation/test splits are deter-ministically assigned by camera name/suffix, making the split effectively invariant over time when the same camera set is reused—a property that is essential for controlled tem-poral benchmarking of dynamic NVS methods. 
+
+# 5. Experiment and Results 
+
+Implementation Details. We implemented our approach using PyTorch 2.5.1 and conducted all experiments on NVIDIA GPUs with CUDA 11.8. All experiments are per-formed on an NVIDIA A40 GPU (50 GB RAM). 
+
+5.1. Dataset for Evaluation 
+
+In this section, we briefly summarize the synthetic dynamic scene datasets used for evaluation. For consistency, we keep dataset construction, camera setup, and train/validation/test split set same as proposed recently in [57]. 
+
+5.1.1. Synthetic Multiview Dynamic Scene Dataset. 
+
+We imported three synthetic datasets proposed in [57] us-ing our benchmarking API in Blender 4.0 for evaluation: 
+
+(i) Dancing-Walking-Standing ( D-WS ), (ii) Soccer Penalty Kick ( S-PK ), and (iii) Soccer Multiplayer ( S-MP ). The 3D models and hemispherical experimental setup used to cre-ate these datasets is same as [57]. Under the synchronized multiview camera setup, for each discrete time instance we acquire It (refer to Eq. (1)). 
+
+(i) Dancing-Walking-Standing (D-WS). This dataset con-tains three dynamic subjects exhibiting diverse motion pat-terns, including dancing, walking, and standing. A total of 65 time instances are rendered, each from 100 calibrated camera viewpoints. We designate the 0th , 30 th , 60 th , and 
+
+90 th cameras as test views, while the 1st camera is used for validation. This yields 95 training views, 1 validation view, and 4 test views per time step, resulting in 6,175 training images ( 65 × 95 ), 65 validation images ( 65 × 1), and 260 test images ( 65 × 4). The split remains fixed across all time steps to ensure reproducible benchmarking. 
+
+(ii) Soccer Penalty Kick (S-PK). This dataset consists of two dynamic subjects simulating a soccer penalty kick sce-5a) Hemispherical  b) Elliptical  c) Stadium -wide  d) Compatible format Figure 3. Showing different camera configurations (in black frustum) as well as file format than can be generated using the proposed API.                                                                                                                                                                 
+
+> Method →D-3DGS [36] 4DGS [51] ST-GS [32] D-NeRF [42] T-4D [45] HP [11] KP [16] S-RF [28] TACV [57] TA-3DGS D-WS
+> PSNR 18.45 28.17 20.03 6.44 16.55 15.82 16.40 18.87 34.28 42.50
+> LPIPS 0.1396 0.0800 0.1120 0.5726 0.2165 0.2470 0.2327 0.2054 0.0275 0.0110
+> Memory 2.0MB 21.0MB 3.2MB 512k 280MB 68MB 419MB 2.2GB 3.1GB 4.94GB Train Time 1.41h 0.83h 0.46h 4.25h 10.02h 0.96h 1.02h 0.65h 5.25h 2.76h Iterations 130K 17K 30K 20K 200K 25K 30K 80K 19K 8k S-PK
+> PSNR 26.45 26.25 25.99 10.64 25.86 22.45 21.30 22.28 33.81 44.59
+> LPIPS 0.0719 0.0450 0.0778 0.4070 0.0588 0.1567 0.1866 0.1792 0.0282 0.0023
+> Memory 2.0MB 13.9MB 0.9MB 197K 280MB 68MB 419MB 1.8 GB 5.2GB 4.25GB Train Time 1.48h 3.02h 0.47h 7.74h 9.12h 0.75h 0.94h 0.55h 8.90h 4.68h Iterations 130K 17K 30K 20K 200K 25K 30K 80K 16.5K 8k S-MP
+> PSNR 26.43 26.20 25.92 6.15 25.82 20.42 19.34 24.98 31.85 43.84
+> LPIPS 0.0872 0.061 0.104 0.5330 0.0881 0.2104 0.2115 0.0906 0.0392 0.0023
+> Memory 2.0MB 19MB 0.9MB 228K 280MB 68M 419MB 1.8GB 4.0GB 3.81GB Train Time 1.46h 2.94h 0.71h 4.21h 10.1h 0.83h 1.03h 0.58h 6.28h 3.44h Iterations 130K 17K 30K 20K 200K 25K 30K 80K 16.5K 8k
+
+Table 1. Comparison of our results with popular dynamic NeRF and dynamic 3DGS approaches on three synthetic datasets. By using the warm-start up strategy with the multiview rigidity in a synchronized camera setup, we achieve best PSNR and LPIPS score. The notable part is that our approach despite using the fixed number of Gaussians, it demonstrate high-quality results for Dynamic NVS. 
+
+nario. We render 109 time instances, each from 60 camera viewpoints. The 21 st , 37 th , 40 th , and 56 th cameras are used for testing, while the 0th camera is reserved for validation. This results in 55 training views, 1 validation view, and 4 test views per frame, corresponding to 5,995 training im-ages ( 109 × 55 ), 109 validation images ( 109 × 1), and 436 test images ( 109 × 4). All cameras are temporally synchro-nized to ensure consistent multiview capture. 
+
+(iii) Soccer Multiplayer (S-MP). This dataset captures three dynamic subjects performing coordinated soccer ac-tions. It contains 83 time instances rendered from 60 cam-era viewpoints. Among these, 55 viewpoints are used for training, 1 for validation, and 4 for testing. Specifically, the 
+
+21 st , 37 th , 40 th , and 56 th cameras are used as test views, and the 0th camera is used for validation. This produces 4,565 training images ( 83 × 55 ), 83 validation images ( 83 × 1), and 332 test images ( 83 × 4). As with the other datasets, synchronized cameras are used throughout for evaluation. 
+
+(iv) Soccer field in different weather condition. We further propose three soccer field datasets under differ-ent weather conditions, namely Cloudy SoccerField , Snow SoccerField , and Sunny SoccerField , generated using our Blender plugin. It contains 120 time instances rendered from 60 camera viewpoints. Among these, 58 viewpoints are used for training and 2 for testing. This produces 6960 training images ( 58 × 120 ), and 240 test images ( 2 × 120 ). All images are rendered at 1920 × 1080 resolution. 
+
+5.1.2. Evaluation and Results 
+
+We evaluate the rendering quality of approaches using the popular PSNR and LPIPS metric. We measure the ren-dering efficiency in frames-per-second (FPS). We assume synchronized well-calibrated camera intrinsic and extrin-sic setting. For the first time step, we initialize the 3DGS model using a ground-truth point cloud exported from our Blender-based data generation plugin. For each subsequent time step, we initialize the optimization using the optimized 3DGS model from the immediately preceding frame. We disable the densification for the subsequent time step to re-duce computational overhead, while adhering to warm-start for preserving temporal consistency. 
+
+(i) Results on D-WS, S-PK, and S-MP dataset. For benchmarking, we compare our method against popular dy-namic scene NVS methods such as D-NeRF [42], D-3DGS 6Dataset Total Train Img Test Img Iter. for A Iter. for B PSNR ↑ LPIPS ↓ Merging Time Total Memory ( A + B filtered) Cloudy SoccerField 6960 2 30000 5200 28.15 0.370 0.92h 886MB Snow SoccerField 6960 2 30000 5200 35.00 0.270 0.66h 478MB Sunny SoccerField 6960 2 30000 5200 28.51 0.337 1.46h 888MB 
+
+Table 2. TA-3DGS results on the new soccer field datasets using H100 with A/B separate reconstruction. 
+
+Frame S1 (Warm + Densify ) S2 (Warm + NoDensify ) S3 (GT Init) Train (sec) Splats Size (MB) Train (sec) Splats Size (MB) Train (sec) Splats Size (MB) 1 134.73 188,393 44.56 202.02 100,000 23.65 209.73 187,982 44.46 2 164.55 355,786 84.15 197.19 100,000 23.65 208.50 189,927 44.92 3 195.33 524,774 124.12 195.77 100,000 23.65 210.12 189,107 44.73 4 225.10 691,359 163.52 194.16 100,000 23.65 212.10 188,876 44.67 5 253.52 846,094 200.11 194.29 100,000 23.65 210.75 189,723 44.87 
+
+Table 3. Warm start initialization analysis under different experimental setting. We compare S1 (Warm +Densify ), S2 (Warm +NoDensify ),and S3 (GT Init) for the dynamic part of the scene over the first 5 time instance. The quantitative results clearly support our approach ( S2 ). 
+
+[36], 4DGS [51], and ST-GS [32], and others. For the first time step, we initialize all the 3DGS model with same 
+
+100 , 000 points. The initial time frames and all subsequent time frames are trained for 8, 000 iterations. Such a take en-ables an efficient temporally chained optimization process while reusing geometric priors from earlier frames. Table 1 provides the quantitative comparison results, demonstrating the benefits of our approach in rendering quality while man-aging favorable memory footprint and train time. Figure 4 show comparison results with recent work [57]. S-PK D-WS  S-MP       
+
+> PSNR: 34.28
+> PSNR: 42.50
+> PSNR: 33.81
+> PSNR: 44.59
+> PSNR: 31.85
+> PSNR: 43.84
+> TA -CV Ours
+
+Figure 4. Qualitative comparison with recent TACV [57] on D-WS, S-PK, and S-MP. Clearly, our approach shows better results. 
+
+(ii) Results on Weather-Condition Soccerfield dataset. 
+
+Since this dataset contains background with significant in-formation, we decompose the scene into two components: (1) a static component A and (2) the dynamic components 
+
+B. A corresponds to the stadium and background, while 
+
+B comprises the moving players. By separating the scene into a static component A and a dynamic component B,we avoid repeatedly optimizing the full scene at every time step. The static background A is reconstructed once, while 
+
+B focuses on the time-varying foreground modeling. This significantly reduces the model size for per-frame optimiza-tion and improves training efficiency. At rendering time, the two components are merged to produce the final scene. To isolate the dynamic component, we construct residual masks for each camera view by comparing the ground-truth image with an A-only rendering, followed by RGB differ-encing, thresholding, and simple morphological refinement. The Gaussians in B are then projected across all views, and a multi-view voting rule is applied to retain only Gaus-sians consistently supported by the residual masks. This helps suppress background leakage and preserve motion-consistent dynamic points. We also optionally apply a 3D Axis-Aligned Bounding Box (AABB)-based boundary rule to smooth the transition near the merge region. The fi-nal frame-wise scene is obtained by merging the Gaussians from the static component A with the retained Gaussians from B into a single 3DGS representation, which is then used for rendering. In practice, this A/B separation per-forms best when both components share identical camera parameters and similar lighting conditions; otherwise, the residual masks may become noisy. For the first time step, we initialize the model with 
+
+100 , 000 points, and trained for 30000 and 5200 for A and 
+
+B, respectively, Table 2 shows the quantitative results ob-tained using our approach. It is observed that by using Warm-start approach, we can deploy dynamic NVS solution for large-scale dynamic novel synthesis that is memory ef-ficient with excellent image synthesis quality, and thus suit-able for retrospective archival and replay. 
+
+5.2. Ablations 
+
+We conducted all our ablations on the proposed Snow Soc-cerField dataset. To show the practical importance of our approach, we performed this ablation under three setting: • S1 (Warm + Densify): start the experiment with warm-start initialization and enable 3DGS densification. 7• S2 (Warm +NoDensify): start the experiment with warm-start initialization but disable 3DGS densification. • S3 (GT Init): for every time step, initialize the splats us-ing GT point cloud. 
+
+(i) Warm-Start Initialization Analysis. The objective of this ablation is to evaluate whether warm-start initializa-tion without densification training across sequential frames is scalable and efficient take to the problem or not. From statistical result presented in Table 3, it is evident that S1 suffers from a severe scalability problem. Here, enabling densification leads to continuous accumulation of Gaussians splats for the dynamic players over time, thus rapidly inflating the model capacity, i.e., growing from 
+
+∼188 K to ∼850 K splats over just 5 frames. This leading to a 5× increase in its memory footprint. Meanwhile, S3 
+
+provides a impractical setting yet a stable reference. This experimental setting resets the method with new splats via GT point cloud initialization for each time instance. While the results could be impressive, it is practically not feasi-ble due to high-compute requirement either via deployment of LiDAR sensors or running COLMAP for each time in-stance, and therefore serves as a stable baseline. On the contrary, our approach i.e., S2 maintains a strictly fixed ca-pacity (e.g., 100K Splats), avoiding temporal splat accumu-lation while keeping both runtime and storage predictable. Overall, this ablation clearly highlight the scalability limi-tations of unconstrained densification for sequential warm-start training and suitability of our approach in efficient ret-rospective NVS for long dynamic scene video. 
+
+(ii) Image Synthesis Quality and Practical Feasibility Analysis. We further analyzed the trade-off between ini-tialization efficiency and the final merged scene rendering quality (measured in PSNR and LPIPS). Table 4 provides the quantitative results across 15 frames of the Snow Soc-cerField sequence. While S1 achieves consistently better PSNR and LPIPS metrics, this empirical improvement is entirely driven by its continuously expanding number of splats and model capacity, which we have shown to be highly impractical for longer sequences due to excessive computational overhead (refer to Table 3). On the contrary, 
+
+S2 exhibits a mild performance improvement over time, offering a better trade-off between rendering quality, effi-ciency, and model capacity for the practical deployment of retrospective dynamic scene NVS. 
+
+5.3. Limitations 
+
+Capture assumptions. Our formulation assumes (i) accu-rate camera calibration and (ii) temporal synchronization across views. In real deployments, small errors in intrinsics, extrinsics, rolling-shutter effects, or sub-frame asynchro-nization can lead to multi-view inconsistencies that may de-grade reconstruction quality and, this can lead to accumula-tion of error over time due to warm-chain setting. Moreover, our method is tailored to static camera rigs and extensions to moving or zooming cameras, or to continuously changing intrinsics are not directly addressed. 
+
+Initialization dependence. We initialize the first frame using point cloud, after which optimization proceeds via warm-start. If the initial point cloud is too sparse or bi-ased (e.g., due to reflections, textureless surfaces, or a lim-ited baseline), the fixed-budget warm chain may not fully recover missing geometry. Improving robustness under im-perfect initialization is an important direction. Frame S1 (Warm + Densify ) S2 (Warm + NoDensify )                               
+
+> PSNR LPIPS PSNR LPIPS 128.39 0.395 27.23 0.426 229.12 0.373 27.73 0.412 329.87 0.353 27.98 0.406 430.60 0.335 28.10 0.402 531.25 0.325 28.22 0.400
+> Table 4. Quality Comparison (PSNR ↑and LPIPS ↓) across 5 frames from the Snow SoccerField dataset under S1 and S2 abla-tion settings. Metrics are computed on the final merged renderings.
+
+# 6. Conclusion 
+
+In this paper, we studied retrospective NVS of dynamic scenes under synchronized multi-view capture, and revis-ited the necessity of explicit temporal deformation con-straints for dynamic 3D Gaussian Splatting. Our central ob-servation is that, in a well calibrated multi-camera rigs, each time instant is already strongly constrained by multi-view geometry. Building on this premise, we introduced a warm-start, densification-free 3DGS pipeline that propagates op-timized Gaussians over time while keeping model size and compute predictable. Across the benchmark datasets, the proposed approach achieves high-fidelity retrospective im-age rendering quality with excellent practical scalability, showing that strong multi-view constraints can reduce re-liance on complex temporal coupling. To complement our approach, we proposed a standardized, dynamic, multi-view dataset generation API and benchmarking framework in Blender to reduce friction caused by inconsistent coor-dinate conventions and dataset formats. Together, our con-tributions aim to improve both the practical efficiency of time-archival dynamic NVS and the reproducibility of com-parisons across dynamic NeRF and 3DGS methods. 
+
+# Acknowledgment 
+
+The authors thank High Performance Research Computing (HPRC) at Texas A&M University, College Station Texas, USA for providing us with the startup credits for utilizing the GPU-server facility. 8References 
+
+[1] Kara-Ali Aliev, Artem Sevastopolsky, Maria Kolos, Dmitry Ulyanov, and Victor Lempitsky. Neural point-based graph-ics. In Computer Vision–ECCV 2020: 16th European Con-ference, Glasgow, UK, August 23–28, 2020, Proceedings, Part XXII 16 , pages 696–712. Springer, 2020. [2] Benjamin Attal, Jia-Bin Huang, Michael Zollh¨ ofer, Johannes Kopf, and Changil Kim. Learning neural light fields with ray-space embedding. In Proceedings of the IEEE/CVF Con-ference on Computer Vision and Pattern Recognition , pages 19819–19829, 2022. [3] Benjamin Attal, Jia-Bin Huang, Christian Richardt, Michael Zollhoefer, Johannes Kopf, Matthew O’Toole, and Changil Kim. Hyperreel: High-fidelity 6-dof video with ray-conditioned sampling. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,pages 16610–16620, 2023. [4] Aayush Bansal, Minh Vo, Yaser Sheikh, Deva Ramanan, and Srinivasa Narasimhan. 4d visualization of dynamic events from unconstrained multi-view videos. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 5366–5375, 2020. [5] Jonathan T Barron, Ben Mildenhall, Matthew Tancik, Peter Hedman, Ricardo Martin-Brualla, and Pratul P Srinivasan. Mip-nerf: A multiscale representation for anti-aliasing neu-ral radiance fields. In Proceedings of the IEEE/CVF Inter-national Conference on Computer Vision , pages 5855–5864, 2021. [6] Jonathan T Barron, Ben Mildenhall, Dor Verbin, Pratul P Srinivasan, and Peter Hedman. Mip-nerf 360: Unbounded anti-aliased neural radiance fields. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 5470–5479, 2022. [7] Mojtaba Bemana, Karol Myszkowski, Hans-Peter Seidel, and Tobias Ritschel. X-fields: Implicit neural view-, light-and time-image interpolation. ACM Transactions on Graph-ics (TOG) , 39(6):1–15, 2020. [8] Blender Online Community. Blender - a 3D modelling and rendering package . Blender Foundation, Stichting Blender Foundation, Amsterdam, 2022. [9] Michael Broxton, John Flynn, Ryan Overbeck, Daniel Erick-son, Peter Hedman, Matthew Duvall, Jason Dourgarian, Jay Busch, Matt Whalen, and Paul Debevec. Immersive light field video with a layered mesh representation. ACM Trans-actions on Graphics (TOG) , 39(4):86–1, 2020. [10] Chris Buehler, Michael Bosse, Leonard McMillan, Steven Gortler, and Michael Cohen. Unstructured lumigraph ren-dering. In Proceedings of the 28th annual conference on Computer graphics and interactive techniques , pages 425– 432, 2001. [11] Ang Cao and Justin Johnson. Hexplane: A fast representa-tion for dynamic scenes. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,pages 130–141, 2023. [12] Anpei Chen, Zexiang Xu, Andreas Geiger, Jingyi Yu, and Hao Su. Tensorf: Tensorial radiance fields. In European con-ference on computer vision , pages 333–350. Springer, 2022. [13] Zhang Chen, Anpei Chen, Guli Zhang, Chengyuan Wang, Yu Ji, Kiriakos N Kutulakos, and Jingyi Yu. A neural rendering framework for free-viewpoint relighting. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 5599–5610, 2020. [14] Ben Fei, Jingyi Xu, Rui Zhang, Qingyuan Zhou, Weidong Yang, and Ying He. 3d gaussian splatting as new era: A survey. IEEE Transactions on Visualization and Computer Graphics , 2024. [15] Brandon Yushan Feng and Amitabh Varshney. Signet: Ef-ficient neural representation for light fields. In Proceedings of the IEEE/CVF International Conference on Computer Vi-sion , pages 14224–14233, 2021. [16] Sara Fridovich-Keil, Giacomo Meanti, Frederik Rahbæk Warburg, Benjamin Recht, and Angjoo Kanazawa. K-planes: Explicit radiance fields in space, time, and appearance. In 
+
+Proceedings of the IEEE/CVF Conference on Computer Vi-sion and Pattern Recognition , pages 12479–12488, 2023. [17] Sharath Girish, Tianye Li, Amrita Mazumdar, Abhinav Shri-vastava, Shalini De Mello, et al. Queen: Quantized efficient encoding of dynamic gaussians for streaming free-viewpoint videos. Advances in Neural Information Processing Systems ,37:43435–43467, 2024. [18] Yasaman Haghighi, Suryansh Kumar, Jean-Philippe Thiran, and Luc Van Gool. Neural implicit dense semantic slam. 
+
+arXiv preprint arXiv:2304.14560 , 2023. [19] Richard Hartley. Multiple view geometry in computer vision .Cambridge university press, 2003. [20] Nishant Jain, Suryansh Kumar, and Luc Van Gool. Ro-bustifying the multi-scale representation of neural radiance fields. In 33rd British Machine Vision Conference Proceed-ings , page 578. BMVA Press, 2022. [21] Nishant Jain, Suryansh Kumar, and Luc Van Gool. Enhanced stable view synthesis. In Proceedings of the IEEE/CVF Con-ference on Computer Vision and Pattern Recognition , pages 13208–13217, 2023. [22] Nishant Jain, Suryansh Kumar, and Luc Van Gool. Learning robust multi-scale representation for neural radiance fields from unposed images. International Journal of Computer Vision , 132(4):1310–1335, 2024. [23] Hanbyul Joo, Hao Liu, Lei Tan, Lin Gui, Bart Nabbe, Iain Matthews, Takeo Kanade, Shohei Nobuhara, and Yaser Sheikh. Panoptic studio: A massively multiview system for social motion capture. In Proceedings of the IEEE inter-national conference on computer vision , pages 3334–3342, 2015. [24] Berk Kaya, Suryansh Kumar, Carlos Oliveira, Vittorio Fer-rari, and Luc Van Gool. Uncertainty-aware deep multi-view photometric stereo. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition , pages 12601–12611, 2022. [25] Berk Kaya, Suryansh Kumar, Francesco Sarno, Vittorio Fer-rari, and Luc Van Gool. Neural radiance fields approach to deep multi-view photometric stereo. In Proceedings of the IEEE/CVF winter conference on applications of computer vision , pages 1965–1977, 2022. [26] Bernhard Kerbl, Georgios Kopanas, Thomas Leimk¨ uhler, and George Drettakis. 3d gaussian splatting for real-time 
+
+9radiance field rendering. ACM Trans. Graph. , 42(4):139–1, 2023. [27] Shakiba Kheradmand, Daniel Rebain, Gopal Sharma, Wei-wei Sun, Yang-Che Tseng, Hossam Isack, Abhishek Kar, Andrea Tagliasacchi, and Kwang Moo Yi. 3d gaussian splat-ting as markov chain monte carlo. Advances in Neural Infor-mation Processing Systems , 37:80965–80986, 2024. [28] Lingzhi Li, Zhen Shen, zhongshu wang, Li Shen, and Ping Tan. Streaming radiance fields for 3d video synthesis. In 
+
+Advances in Neural Information Processing Systems , 2022. [29] Tianye Li, Mira Slavcheva, Michael Zollhoefer, Simon Green, Christoph Lassner, Changil Kim, Tanner Schmidt, Steven Lovegrove, Michael Goesele, Richard Newcombe, et al. Neural 3d video synthesis from multi-view video. In 
+
+Proceedings of the IEEE/CVF Conference on Computer Vi-sion and Pattern Recognition , pages 5521–5531, 2022. [30] Zhengqi Li, Simon Niklaus, Noah Snavely, and Oliver Wang. Neural scene flow fields for space-time view synthesis of dy-namic scenes. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 6498– 6508, 2021. [31] Zhong Li, Liangchen Song, Celong Liu, Junsong Yuan, and Yi Xu. Neulf: Efficient novel view synthesis with neural 4d light field. In EGSR (ST) , pages 59–69, 2022. [32] Zhan Li, Zhang Chen, Zhong Li, and Yi Xu. Spacetime gaus-sian feature splatting for real-time dynamic view synthesis. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 8508–8520, 2024. [33] Youtian Lin, Zuozhuo Dai, Siyu Zhu, and Yao Yao. Gaussian-flow: 4d reconstruction with dynamic 3d gaus-sian particle. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 21136– 21145, 2024. [34] Stephen Lombardi, Tomas Simon, Jason Saragih, Gabriel Schwartz, Andreas Lehrmann, and Yaser Sheikh. Neural vol-umes: learning dynamic renderable volumes from images. 
+
+ACM Transactions on Graphics (TOG) , 38(4):1–14, 2019. [35] Stephen Lombardi, Tomas Simon, Gabriel Schwartz, Michael Zollhoefer, Yaser Sheikh, and Jason Saragih. Mix-ture of volumetric primitives for efficient neural rendering. 
+
+ACM Transactions on Graphics (ToG) , 40(4):1–13, 2021. [36] Jonathon Luiten, Georgios Kopanas, Bastian Leibe, and Deva Ramanan. Dynamic 3d gaussians: Tracking by per-sistent dynamic view synthesis. In 2024 International Con-ference on 3D Vision (3DV) , pages 800–809. IEEE, 2024. [37] Ben Mildenhall, Pratul P Srinivasan, Matthew Tancik, Jonathan T Barron, Ravi Ramamoorthi, and Ren Ng. Nerf: Representing scenes as neural radiance fields for view syn-thesis. Communications of the ACM , 65(1):99–106, 2021. [38] Thomas M¨ uller, Alex Evans, Christoph Schied, and Alexan-der Keller. Instant neural graphics primitives with a mul-tiresolution hash encoding. ACM transactions on graphics (TOG) , 41(4):1–15, 2022. [39] Thomas Neff, Pascal Stadlbauer, Mathias Parger, Andreas Kurz, Joerg H Mueller, Chakravarty R Alla Chaitanya, Anton Kaplanyan, and Markus Steinberger. Donerf: Towards real-time rendering of compact neural radiance fields using depth oracle networks. In Computer Graphics Forum , pages 45– 59. Wiley Online Library, 2021. [40] Keunhong Park, Utkarsh Sinha, Jonathan T Barron, Sofien Bouaziz, Dan B Goldman, Steven M Seitz, and Ricardo Martin-Brualla. Nerfies: Deformable neural radiance fields. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 5865–5874, 2021. [41] Keunhong Park, Utkarsh Sinha, Peter Hedman, Jonathan T Barron, Sofien Bouaziz, Dan B Goldman, Ricardo Martin-Brualla, and Steven M Seitz. Hypernerf: A higher-dimensional representation for topologically varying neural radiance fields. ACM Transactions on Graphics (TOG) , 40: 1 – 12, 2021. [42] Albert Pumarola, Enric Corona, Gerard Pons-Moll, and Francesc Moreno-Noguer. D-nerf: Neural radiance fields for dynamic scenes. In Proceedings of the IEEE/CVF Con-ference on Computer Vision and Pattern Recognition , pages 10318–10327, 2021. [43] Johannes L Schonberger and Jan-Michael Frahm. Structure-from-motion revisited. In Proceedings of the IEEE con-ference on computer vision and pattern recognition , pages 4104–4113, 2016. [44] Steven M Seitz and Charles R Dyer. View morphing. In Pro-ceedings of the 23rd annual conference on Computer graph-ics and interactive techniques , pages 21–30, 1996. [45] Ruizhi Shao, Zerong Zheng, Hanzhang Tu, Boning Liu, Hongwen Zhang, and Yebin Liu. Tensor4d: Efficient neural 4d decomposition for high-fidelity dynamic reconstruction and rendering. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 16632– 16642, 2023. [46] Mohammed Suhail, Carlos Esteves, Leonid Sigal, and Ameesh Makadia. Light field neural rendering. In Proceed-ings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 8269–8279, 2022. [47] Matthew Tancik, Ethan Weber, Evonne Ng, Ruilong Li, Brent Yi, Justin Kerr, Terrance Wang, Alexander Kristof-fersen, Jake Austin, Kamyar Salahi, Abhik Ahuja, David McAllister, and Angjoo Kanazawa. Nerfstudio: A modular framework for neural radiance field development. In ACM SIGGRAPH 2023 Conference Proceedings , 2023. [48] Justus Thies, Michael Zollh¨ ofer, and Matthias Nießner. De-ferred neural rendering: Image synthesis using neural tex-tures. Acm Transactions on Graphics (TOG) , 38(4):1–12, 2019. [49] Huan Wang, Jian Ren, Zeng Huang, Kyle Olszewski, Men-glei Chai, Yun Fu, and Sergey Tulyakov. R2l: Distilling neural radiance field to neural light field for efficient novel view synthesis. In European Conference on Computer Vi-sion , pages 612–629. Springer, 2022. [50] Yifan Wang, Peishan Yang, Zhen Xu, Jiaming Sun, Zhan-hua Zhang, Yong Chen, Hujun Bao, Sida Peng, and Xiaowei Zhou. Freetimegs: Free gaussian primitives at anytime any-where for dynamic scene reconstruction. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 21750–21760, 2025. [51] Guanjun Wu, Taoran Yi, Jiemin Fang, Lingxi Xie, Xiaopeng Zhang, Wei Wei, Wenyu Liu, Qi Tian, and Xinggang Wang. 
+
+10 4d gaussian splatting for real-time dynamic scene rendering. In Proceedings of the IEEE/CVF conference on computer vi-sion and pattern recognition , pages 20310–20320, 2024. [52] Wenhui Xiao, Remi Chierchia, Rodrigo Santa Cruz, Xuesong Li, David Ahmedt-Aristizabal, Olivier Salvado, Clinton Fookes, and Leo Lebrat. Neural radiance fields for the real world: A survey. arXiv preprint arXiv:2501.13104 ,2025. [53] Yiheng Xie, Towaki Takikawa, Shunsuke Saito, Or Litany, Shiqin Yan, Numair Khan, Federico Tombari, James Tomp-kin, Vincent Sitzmann, and Srinath Sridhar. Neural fields in visual computing and beyond. In Computer graphics forum ,pages 641–676. Wiley Online Library, 2022. [54] Ziyi Yang, Xinyu Gao, Wen Zhou, Shaohui Jiao, Yuqing Zhang, and Xiaogang Jin. Deformable 3d gaussians for high-fidelity monocular dynamic scene reconstruction. In Pro-ceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 20331–20341, 2024. [55] Zeyu Yang, Hongye Yang, Zijie Pan, and Li Zhang. Real-time photorealistic dynamic scene representation and render-ing with 4d gaussian splatting. In International Conference on Learning Representations (ICLR) , 2024. [56] Yunxiao Zhang, William Stone, and Suryansh Kumar. Time-archival camera virtualization for sports and visual perfor-mances. Computer Vision and Image Understanding , 267: 104714, 2026. [57] Yunxiao Zhang, William Stone, and Suryansh Kumar. Time-archival camera virtualization for sports and visual perfor-mances. arXiv preprint arXiv:2602.15181 , 2026. 
+
+11 3D Gaussian Splatting for Efficient Retrospective Dynamic Scene Novel View Synthesis with a Standardized Benchmark 
+
+# Supplementary Material 
+
+# 7. More Detail on Blender API 
+
+While Neural Radiance Fields (NeRF) and 3D Gaussian Splatting (3DGS) have achieved remarkable progress in novel view synthesis , preparing multi-view datasets across different methods remains a bottleneck due to varying for-mat requirements and coordinate system conventions To al-leviate the extensive manual setup and debugging typically required for dataset conversion, we introduce our compre-hensive Blender add-on designed to streamline the genera-tion of synthetic datasets. It facilitates the extraction of consistent camera param-eters and rendered images over time, bridging the gap be-tween synthetic scene creation in Blender and ready-to-train pipelines for various 3DGS and NeRF variants in just a few clicks It is particularly well-suited for dynamic scene evalu-ation and complex camera virtualization tasks, such as those involving sports broadcasting 
+
+7.1. Key Features 
+
+Our proposed tool significantly accelerates the data prepa-ration and empirical evaluation processes through the fol-lowing core functionalities: • Versatile Camera Generation & Stadium Layout: The add-on supports standard sampling layouts, including up-per hemisphere, full sphere, and elliptical rings Crucially for large-scale and sports-focused applications, it intro-duces a specialized Stadium Layout designed for soccer and football stadiums This feature allows users to define field dimensions, generate grid-based camera tiles , and automatically position goal-line cameras , ensuring com-prehensive multi-view coverage for methods like TACV • Flexible Dataset Export Modes: To support mod-ern point-based rendering techniques, RS Studio exports point clouds using either a 3DGS COLMAP surface mode (sampled directly from the mesh surface) or a 3DGS depth mode (generated via ray intersections from RS Stu-dio cameras) • Dynamic Camera Tracking: For downstream evalu-ation and instant render testing of dynamic models , the tool exports per-frame camera tracks with intrinsics and extrinsics formatted as JSON files Supported track-ing modes include keyframed animation, automated orbit paths, linear interpolation, and target following • Dataset Import and Pose Validation: Users can import existing datasets in standard NeRF synthetic or custom TACV formats to visually verify camera poses within the 3D environment or reuse existing configurations for new data generation • Geographically-Aware Lighting: Through integration with physical solar models, the tool provides adjustable indoor and outdoor lighting driven by specific geographic coordinates (latitude and longitude) and time , enabling robust illumination augmentation for synthetic scenes. By open-sourcing RS Studio, we aim to provide the com-munity with a robust pipeline that lowers the barrier to en-try for constructing complex, temporal, and large-scale syn-thetic datasets. 
+
+# 8. Additional Ablation Studies 
+
+Here, we provide additional analyses supporting the two central claims of the paper: (i) our time-archival 3DGS formulation preserves the practical efficiency of Gaussian splatting for retrospective rendering, and (ii) warm-start training primarily exploits local temporal smoothness rather than any implicit temporal coupling in the objective. Un-less otherwise stated, all evaluations follow the same cam-era calibration, train/val/test split protocol, and training im-plementation described in the main paper.                    
+
+> Table 5. Real-time rendering comparison. TA-3DGS preserves the native rendering efficiency of Gaussian splatting while operating at full HD resolution (1920 ×1080). On a single A40 GPU, our method achieves real-time rendering across three TACV datasets, reaching 65.8 FPS on DWS, 55.9 FPS on SPK, and 59.9 FPS on SMP. Prior dynamic Gaussian methods such as 4DGS and Free-TimeGS also report real-time rendering, although the reported numbers are measured on different GPUs and resolutions.
+> Method GPU Rendering Resolution FPS ↑
+> 4DGS [51] RTX 3090 800 ×800 82 FreeTimeGS [50] RTX 4090 1920 ×1080 450 TA-3DGS (ours, DWS) A40 1920 ×1080 65.8 TA-3DGS (ours, SPK) A40 1920 ×1080 55.9 TA-3DGS (ours, SMP) A40 1920 ×1080 59.9
+
+8.1. Real-Time Rendering Throughput at Full HD 
+
+Table 5 reports rendering throughput at full HD (1920 ×1080) on a single NVIDIA A40 GPU. TA-3DGS achieves real-time performance across all three TACV sequences, reaching 65.8 FPS on DWS, 55.9 FPS on SPK, and 59.9 FPS on SMP. These results indicate that our time-archival representation retains the native runtime advantages of Gaussian splatting despite operating at high resolution. 12 Resolution-normalized throughput. Since prior dy-namic Gaussian approaches report FPS under different reso-lutions and GPU configurations, direct FPS comparisons are not strictly controlled. For additional context, we report a resolution-normalized throughput in megapixels per second (MPix/s), computed as MPix /s = FPS · H · W/ 10 6. Under this metric, TA-3DGS achieves 136.4 MPix/s (DWS), 115.9 MPix/s (SPK), and 124.2 MPix/s (SMP) at 1920 ×1080 . By comparison, 4DGS reports 52.5 MPix/s at 800 × 800 , while FreeTimeGS [50] reports substantially higher throughput at 
+
+1920 × 1080 on an RTX 4090. We emphasize that these numbers remain indicative only, as GPU architecture and implementation details differ across works. 
+
+8.2. Warm-Start Test 
+
+A key interpretability question is whether warm-starting yields benefits because the optimization implicitly encodes a temporal constraint (e.g., through hidden coupling in the loss), or simply because adjacent frames are typically lo-cally smooth. To isolate this effect, we introduce an “dis-tant warm-start” baseline on DWS (Table 6). This base-line keeps the dataset, loss, and training pipeline fixed, but replaces the standard adjacent-frame initialization with an initialization from a temporally distant checkpoint; the re-sult is reported on frames 40–49. The distant warm-start baseline exhibits a “large qual-ity degradation” , dropping PSNR from 42.50 to 26.80 (ab-solute drop: 15.70 dB; relative: −36 .94% ) and increasing LPIPS from 0.0111 to 0.0246 (absolute increase: 0.0135; relative: +121 .99% ). This controlled perturbation supports the interpretation that warm-start primarily leverages local temporal continuity and a favorable basin of attraction for optimization, rather than relying on any implicit temporal coupling embedded in the objective formulation. 
+
+8.3. Extended Warm-Start Analysis 
+
+The main paper reports warm-start ablations over a short temporal window i.e., 5 frame window. Here, we extend the evaluation to 15 time instances for the dynamic compo-nent (Table 7), comparing: S1 (Warm + Densify), S2 (Warm + NoDensify, ours), and S3 (GT Init per frame). This ex-tended analysis clarifies two practical properties: quality robustness over longer warm-start chains and the effect of densification on apparent quality gains. 
+
+Quality trends. Across 15 frames, S1 achieves consis-tently higher PSNR and lower LPIPS than S2 and S3; how-ever, this improvement is expected because densification in-creases model capacity over time, which is precisely the scalability issue highlighted in the main paper. In contrast, S2 maintains a fixed Gaussian budget and therefore priori-tizes stability in representation size and speed. Despite this constraint, S2 remains competitive with the per-frame GT               
+
+> Table 6. Effect of abnormal distant warm-start on DWS. Com-pared with the standard warm-start setting, initializing a target segment from a temporally distant checkpoint causes a substantial quality drop on DWS. This supports the interpretation that warm-start primarily benefits from local temporal smoothness , rather than any hidden temporal coupling in the loss design.
+> Setting PSNR ↑LPIPS ↓
+> Standard warm-start 42.5027 0.0111 Distant warm-start baseline 26.8031 0.0246 Absolute drop / increase -15.6996 +0.0135 Relative change -36.94% +121.99%
+> Note: The distant warm-start baseline keeps the same dataset and training pipeline, but replaces normal adjacent-frame initialization with an abnormal initialization from a temporally distant checkpoint. The reported distant warm-start result is measured on frames 40–49 of DWS.
+
+initialization baseline S3. Averaged across the 15 frames, S2 attains 28.21 dB PSNR and 0.3998 LPIPS, while S3 attains 28.37 dB PSNR and 0.3945 LPIPS. The small gap indicates that warm-starting with fixed capacity is able to preserve most of the per-frame reinitialization quality while avoiding its computational overhead and impractical sens-ing requirements. 
+
+Interpretation. The extended results reinforce the pa-per’s central claim: under synchronized multi-view con-straints, a temporally chained optimization strategy can re-main stable over time even without explicit deformation constraints. Meanwhile, the superior quality of S1 should be interpreted in light of its expanding model complexity (enabled by densification), rather than as evidence that ex-plicit temporal coupling is necessary. 
+
+8.4. Per-Frame Training Throughput Under Fixed-Capacity Warm-Start 
+
+Table 8 reports the per-iteration time for S2 across the same 15-frame window. Even with a fixed number of Gaussians, the iteration time increases from 12.34 ms (frame 1) to 34.50 ms (frame 15), with an average of 24.91 ms per itera-tion. This increase is consistent with the fact that the raster-ization workload of Gaussian splatting depends not only on the count of Gaussians but also on scene-dependent visibil-ity patterns and screen-space coverage, which can change over time for dynamic sequences. 
+
+Practical implication. Despite this variability, S2 main-tains predictable memory and representation size (no den-sification) while sustaining practical training throughput across time. This observation complements the real-time rendering results (Section 8.1) and supports the overall de-ployment motivation of time-archival retrospective render-ing in long dynamic events. 13 Table 7. Extended Analysis of Warm Start Initializations. 
+
+We provide a detailed comparison of S1 (Warm+Densify), S2 (Warm+NoDensify), and S3 (GT Init) across 15 time instances. These extended results for the dynamic part of the scene further support the robustness of our approach (S2) beyond the 5 frames presented in the main paper. 
+
+PSNR ↑ LPIPS ↓
+
+Frame S1 S2 S3 S1 S2 S3 1 28.386 27.229 28.356 0.3948 0.4257 0.3954 2 29.117 27.727 28.394 0.3733 0.4118 0.3942 3 29.867 27.980 28.343 0.3532 0.4058 0.3948 4 30.595 28.103 28.345 0.3350 0.4024 0.3952 5 31.253 28.221 28.367 0.3246 0.3998 0.3951 6 31.856 28.255 28.320 0.3163 0.3982 0.3943 7 32.222 28.270 28.351 0.3108 0.3972 0.3943 8 32.643 28.317 28.345 0.3071 0.3959 0.3942 9 32.839 28.375 28.388 0.3035 0.3953 0.3940 10 33.235 28.381 28.342 0.3005 0.3948 0.3946 11 33.356 28.424 28.439 0.2990 0.3947 0.3948 12 33.519 28.412 28.388 0.2975 0.3941 0.3949 13 33.707 28.431 28.442 0.2964 0.3944 0.3940 14 33.773 28.491 28.421 0.2950 0.3938 0.3940 15 33.818 28.484 28.361 0.2944 0.3934 0.3938 
+
+Table 8. Per-frame Training Speed of S2. Detailed iteration time (ms) for our proposed S2 setting across the extended sequence. 
+
+Frame Iteration Time (ms) 1 12.340 2 14.581 3 16.810 4 18.900 5 20.887 6 22.770 7 24.506 8 25.809 9 27.194 10 28.618 11 29.888 12 31.100 13 32.348 14 33.395 15 34.498 14

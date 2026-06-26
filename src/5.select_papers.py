@@ -796,6 +796,34 @@ def process_mode(
             min_score=float(cfg.get("all_quick_min_score") or 0),
         )
 
+    top_k_text = str(os.getenv("DPR_DAILY_TOP_K") or "3").strip()
+    try:
+        daily_top_k = int(top_k_text)
+    except Exception:
+        daily_top_k = 3
+
+    if mode == "standard" and daily_top_k > 0:
+        picked = sort_by_score(candidates)[:daily_top_k]
+        stats = {
+            "mode": mode,
+            "tag_count": tag_count,
+            "daily_top_k": daily_top_k,
+            "forced_top_k": True,
+            "deep_divecandidates": len(candidates),
+            "deep_cap": 0,
+            "deep_selected": 0,
+            "quick_candidates": len(candidates),
+            "quick_skim_target": daily_top_k,
+            "quick_selected": len(picked),
+        }
+        return {
+            "mode": mode,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "stats": stats,
+            "deep_dive": [],
+            "quick_skim": sanitize_items(picked),
+        }
+    
     deep_candidates = [p for p in candidates if float(p.get("llm_score", 0)) >= 8.0]
     deep_candidates = sort_by_score(deep_candidates)
 

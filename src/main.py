@@ -727,18 +727,7 @@ def main() -> None:
                         continue
 
                     score = float(item.get("score") or 0.0)
-                    star = int(item.get("star_rating") or 0)
-
-                    if star >= 5:
-                        llm_score = 9.5
-                    elif star == 4:
-                        llm_score = 8.0
-                    elif star == 3:
-                        llm_score = 7.0
-                    elif star == 2:
-                        llm_score = 5.0
-                    else:
-                        llm_score = max(0.0, min(10.0, score * 10.0))
+                    llm_score = max(0.0, min(10.0, score * 10.0))
 
                     old = merged.get(pid)
                     if old is not None and llm_score <= float(old.get("score", 0)):

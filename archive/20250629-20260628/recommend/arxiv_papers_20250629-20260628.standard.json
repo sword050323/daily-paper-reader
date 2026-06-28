@@ -1,0 +1,158 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-28T07:01:44.982233+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 6,
+    "daily_top_k": 3,
+    "forced_top_k": true,
+    "deep_divecandidates": 182,
+    "deep_cap": 0,
+    "deep_selected": 0,
+    "quick_candidates": 182,
+    "quick_skim_target": 3,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.16065v1",
+      "source": "arxiv",
+      "title": "Robust Prior-Guided Segmentation for Editable 3D Gaussian Splatting",
+      "abstract": "3D Gaussian Splatting (3D-GS) enables real-time 3D scene reconstruction but lacks robust segmentation for editing tasks such as object removal, extraction, and recoloring. Existing approaches that lift 2D segmentations to the 3D domain suffer from view inconsistencies and coarse masks. In this paper, we propose a novel framework that leverages the Segment Anything Model High Quality (SAM-HQ) to generate accurate 2D masks, addressing the limitations of the standard SAM in boundary fidelity and fine-structure preservation. To achieve robust 3D segmentation of any target object in a given scene, we introduce a prior-guided label reassignment method that assigns labels to 3D Gaussians by enforcing multiview consistency with learned priors. Our approach achieves state-of-the-art segmentation accuracy and enables interactive, real-time object editing while maintaining high visual fidelity. Qualitative results demonstrate superior boundary preservation and practical utility in Virtual Reality (VR) and robotics, advancing 3D scene editing.",
+      "authors": [
+        "Raushan Joshi",
+        "Jean-Yves Guillemaut"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-05-15T15:29:30+00:00",
+      "link": "https://arxiv.org/pdf/2605.16065v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "retrieved by query:multimodal-3d-vision",
+      "llm_evidence_cn": "由检索词条 query:multimodal-3d-vision 命中",
+      "llm_evidence": "由检索词条 query:multimodal-3d-vision 命中",
+      "canonical_evidence": "由检索词条 query:multimodal-3d-vision 命中",
+      "llm_tldr_en": "3D Gaussian Splatting (3D-GS) enables real-time 3D scene reconstruction but lacks robust segmentation for editing tasks such as object removal, extraction, and recoloring. Existing approaches that lift 2D segmentations to the 3D domain suffer from view inconsistencies and coarse ...",
+      "llm_tldr_cn": "3D Gaussian Splatting (3D-GS) enables real-time 3D scene reconstruction but lacks robust segmentation for editing tasks such as object removal, extraction, and recoloring. Existing approaches that lift 2D segmentations to the 3D domain suffer from view inconsistencies and coarse ...",
+      "llm_tldr": "3D Gaussian Splatting (3D-GS) enables real-time 3D scene reconstruction but lacks robust segmentation for editing tasks such as object removal, extraction, and recoloring. Existing approaches that lift 2D segmentations to the 3D domain suffer from view inconsistencies and coarse ...",
+      "llm_tags": [
+        "query:multimodal-3d-vision"
+      ],
+      "matched_query_tag": "query:multimodal-3d-vision",
+      "matched_query_text": "Methods that use CLIP, DINO, SAM, vision-language models, or segmentation priors for Gaussian Splatting, 3D reconstruction, or neural rendering.",
+      "matched_requirement_id": "",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2605.19556v1",
+      "source": "arxiv",
+      "title": "EpiDiffVO: Geometry-Aware Epipolar Diffusion for Robust Visual Odometry",
+      "abstract": "Estimating relative pose from image pairs fundamentally requires only a minimal subset of geometrically consistent correspondences. However, most learning-based approaches rely on dense matching or direct regression, leading to redundancy and reduced geometric interpretability. In this work, we propose a sparse epipolar matching framework that predicts a compact set of correspondences optimized for geometric consistency across varying temporal baselines. To address residual noise and misalignment, we introduce an epipolar diffusion process that models correspondence uncertainty and refines keypoints toward epipolar consistency. The refined correspondences, along with depth cues, are lifted into a graph representation forming a Steiner graph that encodes relational structure between points. A graph neural network learns a compact subset of informative correspondences, which are passed to a differentiable singular value decomposition solver for end-to-end geometric estimation. Relative pose is recovered from the resulting essential matrix and evaluated in a visual odometry setting on the TartanAir and KITTI SLAM datasets. Experimental results demonstrate that combining sparse matching, diffusion-based refinement, and graph-based subset selection reduces correspondence redundancy while maintaining robust pose estimation across challenging baselines.",
+      "authors": [
+        "Prateeth Rao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-05-19T08:53:26+00:00",
+      "link": "https://arxiv.org/pdf/2605.19556v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "retrieved by query:geometric-constraints-foundation-models",
+      "llm_evidence_cn": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "canonical_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_tldr_en": "Estimating relative pose from image pairs fundamentally requires only a minimal subset of geometrically consistent correspondences. However, most learning-based approaches rely on dense matching or direct regression, leading to redundancy and reduced geometric interpretability. I...",
+      "llm_tldr_cn": "Estimating relative pose from image pairs fundamentally requires only a minimal subset of geometrically consistent correspondences. However, most learning-based approaches rely on dense matching or direct regression, leading to redundancy and reduced geometric interpretability. I...",
+      "llm_tldr": "Estimating relative pose from image pairs fundamentally requires only a minimal subset of geometrically consistent correspondences. However, most learning-based approaches rely on dense matching or direct regression, leading to redundancy and reduced geometric interpretability. I...",
+      "llm_tags": [
+        "query:geometric-constraints-foundation-models"
+      ],
+      "matched_query_tag": "query:geometric-constraints-foundation-models",
+      "matched_query_text": "Recent papers about geometric constraints, camera pose estimation, epipolar geometry, bundle adjustment, depth estimation, correspondence matching, or multi-view geometry for 3D reconstruction.",
+      "matched_requirement_id": "",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2605.19727v1",
+      "source": "arxiv",
+      "title": "Tango3D: Towards Alignment for Global and Local 2D-3D Correspondence",
+      "abstract": "Existing 3D foundation models typically align point clouds to frozen vision-language spaces like CLIP, which achieve strong cross-modal retrieval by compressing 3D shape into a global vector. However, this global-only alignment cannot establish fine-grained pixel-to-point correspondence. To solve this, we present Tango3D, a foundation model that unifies dense correspondence and global retrieval. We use a geometry-aware 2D visual backbone and a pretrained 3D VAE to encode images into 2D patches and point clouds into 3D tokens. These are mapped into a single shared space to achieve both local pixel-to-point alignment and global semantic alignment. To stabilize the joint learning of dense and global objectives, we introduce a three-stage progressive training strategy. Experiments show our model successfully achieves object-level pixel-to-point alignment while maintaining competitive global retrieval, a joint capability not offered by existing 3D foundation models. By establishing a fine-grained alignment feature space, Tango3D injects rich semantics into purely geometric 3D tokens, paving the way for a wide range of dense 3D downstream tasks.",
+      "authors": [
+        "Zebin He",
+        "Mingxin Yang",
+        "Shuhui Yang",
+        "Hanxiao Sun",
+        "Xintong Han",
+        "Chunchao Guo",
+        "Wenhan Luo"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-05-19T12:01:23+00:00",
+      "link": "https://arxiv.org/pdf/2605.19727v1",
+      "tags": [
+        "keyword:3dgs-panoramic-reconstruction",
+        "keyword:feed-forward-sparse-view-reconstruction",
+        "keyword:geometric-constraints-foundation-models",
+        "keyword:multimodal-3d-vision",
+        "keyword:novel-view-synthesis-temporal-motion",
+        "keyword:related-neural-rendering-3d-vision",
+        "query:3dgs-panoramic-reconstruction",
+        "query:feed-forward-sparse-view-reconstruction",
+        "query:geometric-constraints-foundation-models",
+        "query:multimodal-3d-vision",
+        "query:novel-view-synthesis-temporal-motion",
+        "query:related-neural-rendering-3d-vision"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "retrieved by query:geometric-constraints-foundation-models",
+      "llm_evidence_cn": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "canonical_evidence": "由检索词条 query:geometric-constraints-foundation-models 命中",
+      "llm_tldr_en": "Existing 3D foundation models typically align point clouds to frozen vision-language spaces like CLIP, which achieve strong cross-modal retrieval by compressing 3D shape into a global vector. However, this global-only alignment cannot establish fine-grained pixel-to-point corresp...",
+      "llm_tldr_cn": "Existing 3D foundation models typically align point clouds to frozen vision-language spaces like CLIP, which achieve strong cross-modal retrieval by compressing 3D shape into a global vector. However, this global-only alignment cannot establish fine-grained pixel-to-point corresp...",
+      "llm_tldr": "Existing 3D foundation models typically align point clouds to frozen vision-language spaces like CLIP, which achieve strong cross-modal retrieval by compressing 3D shape into a global vector. However, this global-only alignment cannot establish fine-grained pixel-to-point corresp...",
+      "llm_tags": [
+        "query:geometric-constraints-foundation-models"
+      ],
+      "matched_query_tag": "query:geometric-constraints-foundation-models",
+      "matched_query_text": "Papers that combine foundation models, visual correspondence, monocular depth, semantic priors, or multimodal models with 3D reconstruction and novel view synthesis.",
+      "matched_requirement_id": "",
+      "selection_source": "fresh_fetch"
+    }
+  ]
+}
